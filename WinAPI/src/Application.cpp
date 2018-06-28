@@ -1,5 +1,9 @@
-﻿#include <windows.h>
+﻿// WinAPI and Modern OpenGL
+#include <windows.h>
+#include <GL/glew.h>
 #include <GLFW\glfw3.h>
+#include <stdio.h>
+#include <string>
 //#include <iostream>
 
 //TCHAR* Simple = (TCHAR*)TEXT("Простое окно...");
@@ -20,8 +24,6 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd, int nShow)
 	if (!glfwInit())
 		return -1;
 
-	glewInit();
-
 	/* Create a windowed mode window and its OpenGL context */
 	window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
 	if (!window)
@@ -33,17 +35,36 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrev, LPSTR lpCmd, int nShow)
 	/* Make the window's context current */
 	glfwMakeContextCurrent(window);
 
+	if (glewInit() != GLEW_OK)
+	{
+		MessageBox(NULL, TEXT("Error!"), TEXT("Hello App"), MB_ICONWARNING | MB_CANCELTRYCONTINUE | MB_DEFBUTTON2);
+	}
+
+	char* openglVersion = (char*)glGetString(GL_VERSION);
+	//const GLubyte* openglVersion = glGetString(GL_VERSION);
+	//MessageBox(NULL, openglVersion, TEXT("Hello App"), MB_ICONWARNING | MB_CANCELTRYCONTINUE | MB_DEFBUTTON2);
+
+	HANDLE myLogFile = CreateFile(TEXT("myLogFile.txt"), GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, NULL, NULL);
+	CloseHandle(myLogFile);
+
+	float positions[6] = {
+		-0.5f, -0.5f,
+		0.0f, 0.5f,
+		0.5f, -0.5f
+	};
+
+	unsigned int buffer;
+	glGenBuffers(1, &buffer);
+	glBindBuffer(GL_ARRAY_BUFFER, buffer);
+	glBufferData(GL_ARRAY_BUFFER, 6 * sizeof(float), positions, GL_STATIC_DRAW);
+
 	/* Loop until the user closes the window */
 	while (!glfwWindowShouldClose(window))
 	{
 		/* Render here */
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		glBegin(GL_TRIANGLES);
-		glVertex2f(-0.5f, -0.5f);
-		glVertex2f(0.0f, 0.5f);
-		glVertex2f(0.5f, -0.5f);
-		glEnd();
+		glDrawArrays(GL_TRIANGLES, 0, 3);
 
 
 		/* Swap front and back buffers */
