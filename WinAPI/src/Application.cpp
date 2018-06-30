@@ -17,10 +17,12 @@ static TCHAR szWindowClass[] = _T("win32app");
 // The string that appears in the application's title bar.
 static TCHAR szTitle[] = _T("Win32 Guided Tour Application");
 
+HINSTANCE hInst;
+
 LRESULT CALLBACK WinProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 int WINAPI WinMain(
-	HINSTANCE hInst,
+	HINSTANCE hInstance,
 	HINSTANCE hPrev,
 	LPSTR lpCmd,
 	int nCmdShow
@@ -98,29 +100,48 @@ int WINAPI WinMain(
 
 	// struct
 	wcex.cbClsExtra = 0;
+	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.cbWndExtra = 0;
 	//wcex.hbrBackground = (HBRUSH)GetStockObject(BLACK_BRUSH);
 	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	//wc.hIcon = LoadIcon(NULL, IDI_APPLICATION);
 	wcex.hIcon = LoadIcon(NULL, MAKEINTRESOURCE(IDI_APPLICATION));
-	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 	wcex.hInstance = hInst;
+	wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 	wcex.lpfnWndProc = WinProc;
 	wcex.lpszClassName = Simple;
 	wcex.lpszMenuName = NULL;
 	//wcex.style = CS_BYTEALIGNCLIENT;
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
 
-	if (RegisterClassEx(&wcex))
+	if (!RegisterClassEx(&wcex))
 	{
-		MessageBox(NULL, _T("Call to RegisterClassEx failed!"), _T("Win32 Guided Tour"), NULL);
+		MessageBox(
+			NULL,
+			_T("Call to RegisterClassEx failed!"),
+			_T("Win32 Guided Tour"),
+			NULL
+		);
 		return 1;
 	}
 
+	hInstance = hInst;
+
 	// Create a window from wc class
 	// Handle to the window
-	//hwnd = CreateWindow(Simple, Simple, WS_OVERLAPPEDWINDOW | WS_VISIBLE, CW_USEDEFAULT, CW_USEDEFAULT, 300, 210, HWND_DESKTOP, NULL, hInst, NULL);
+	/*hwnd = CreateWindow(
+		Simple,
+		Simple,
+		WS_OVERLAPPEDWINDOW | WS_VISIBLE,
+		CW_USEDEFAULT, CW_USEDEFAULT,
+		300,
+		210,
+		HWND_DESKTOP,
+		NULL,
+		hInst,
+		NULL
+	);*/
 	hwnd = CreateWindow(
 		Simple,
 		Simple,
@@ -134,6 +155,7 @@ int WINAPI WinMain(
 		hInst,
 		NULL
 	);
+
 	if (!hwnd)
 	{
 		MessageBox(
