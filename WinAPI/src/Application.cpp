@@ -5,6 +5,8 @@
 #include <stdio.h>
 #include <string>
 #include <tchar.h>
+#include <locale>
+#include <codecvt>
 //#include <iostream>
 
 // Global variables
@@ -18,6 +20,7 @@ static TCHAR szWindowClass[] = _T("win32app");
 static TCHAR szTitle[] = _T("Win32 Guided Tour Application");
 
 HINSTANCE hInst;
+HFONT hFont = NULL;
 
 LRESULT CALLBACK WinProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
@@ -185,12 +188,35 @@ LRESULT CALLBACK WinProc(HWND hwnd, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
 	HDC hdc;
-	TCHAR greeting[] = _T("Hello, World!");
+	TCHAR* greetingT = (TCHAR*)TEXT("Простое окно...");
+	//TCHAR greeting[] = _T("Hello, World!");
+	//TCHAR greeting[] = _T("Здравствуй, Мир!");
+	//TCHAR greeting[] = TEXT("Здравствуй, Мир!");
+	//std::string greetingS("Здравствуй, Мир!");
+	//greetingS = converter.to_bytes(greetingS);
+	//std::wstring greeting;
+	//std::wstring greeting = converter.from_bytes(greetingS);
+	//std::wstring greeting("Здравствуй, Мир!");
+	//std::wstring greeting(L"Здравствуй, Мир!");
+	std::wstring greeting(_T("Здравствуй, Мир!"));
+	int sizeNeeded = WideCharToMultiByte(CP_UTF8, 0, &greeting[0], (int)greeting.size(), NULL, 0, NULL, NULL);
+	std::string greetingS(sizeNeeded, 0);
+	WideCharToMultiByte(CP_UTF8, 0, &greeting[0], (int)greeting.size(), &greetingS[0], sizeNeeded, NULL, NULL);
+	//WideCharToMultiByte(CP_ACP, 0, greeting.c_str(), (int)greeting.size(), &greetingS[0], sizeNeeded, NULL, NULL);
+	//std::wstring greeting(TEXT("Здравствуй, Мир!"));
+	//std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>> converter;
+	//std::wstring_convert<std::codecvt_utf16<wchar_t>> converter;
+	//std::string greetingS = converter.to_bytes(greeting);
+
 	switch (Msg)
 	{
 	case WM_PAINT:
 		hdc = BeginPaint(hwnd, &ps);
-		TextOut(hdc, 5, 5, greeting, _tcslen(greeting));
+		hFont = CreateFont(15, 5, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, VARIABLE_PITCH, _T("Times New Roman"));
+		SelectObject(hdc, hFont);
+		TextOut(hdc, 5, 5, greetingT, _tcslen(greetingT));
+		//TextOut(hdc, 5, 5, greeting.c_str(), _tcslen(greeting.c_str()));
+		//TextOutA(hdc, 5, 5, greetingS.c_str(), strlen(greetingS.c_str()));
 		EndPaint(hwnd, &ps);
 		break;
 	case WM_CLOSE:

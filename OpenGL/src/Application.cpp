@@ -9,106 +9,66 @@
 #include <cfenv>
 #include <algorithm>
 
+#include <AgeType.h>
+#include <Plant.h>
+
 #define SCREEN_WIDTH 600
 #define SCREEN_HEIGHT 600
 
-enum AgeTypes {p = 1, j = 2, im = 5, v = 10, g1 = 14, g2 = 19, g3 = 21, ss = 23, s = 25};
-
-class Plant {
-private:
-	GLfloat x, y, z, radius;
-	AgeTypes ageType;
-	GLfloat age;
-public:
-	Plant();
-	Plant(GLfloat x, GLfloat y, GLfloat z, GLfloat r, AgeTypes ageType, GLfloat age);
-	~Plant();
-
-	GLfloat GetX();
-	GLfloat GetY();
-	GLfloat GetZ();
-	GLfloat GetRadius();
-	AgeTypes GetAgeType();
-	GLfloat GetAge();
-
-	void SetAgeType(AgeTypes ageType);
-	void SetAge(GLfloat age);
-	void SetRadius(double radius);
-
-	void Print();
-};
-
-Plant::Plant() {
-
-}
-
-Plant::Plant(GLfloat x, GLfloat y, GLfloat z, GLfloat radius, AgeTypes ageType, GLfloat age) {
-	this->x = x;
-	this->y = y;
-	this->z = z;
-	this->radius = radius;
-	this->ageType = ageType;
-	this->age = age;
-}
-
-Plant::~Plant() {
-
-}
-
-GLfloat Plant::GetX() {
-	return this->x;
-}
-
-GLfloat Plant::GetY() {
-	return this->y;
-}
-
-GLfloat Plant::GetZ() {
-	return this->z;
-}
-
-GLfloat Plant::GetRadius() {
-	return this->radius;
-}
-
-AgeTypes Plant::GetAgeType() {
-	return this->ageType;
-}
-
-GLfloat Plant::GetAge() {
-	return this->age;
-}
-
-void Plant::SetAgeType(AgeTypes ageType) {
-	this->ageType = ageType;
-}
-
-void Plant::SetAge(GLfloat age) {
-	this->age = age;
-}
-
-void Plant::SetRadius(double radius) {
-	this->radius = radius;
-}
-
-void Plant::Print() {
-	std::cout << "Age = " << this->age << std::endl;
-	std::cout << "Age Type = " << this->ageType << std::endl;
-	std::cout << "X = " << this->x << std::endl;
-	std::cout << "Y = " << this->y << std::endl;
-	std::cout << "Z = " << this->z << std::endl;
-	std::cout << "Radius = " << this->radius << std::endl;
-}
-
-void drawCircle(GLfloat x, GLfloat y, GLfloat z, GLfloat radius, GLint numberOfSides);
-void calcAvgRadius(std::vector<Plant> *plants, std::map<AgeTypes, GLfloat> *averageRadiuses, AgeTypes ageType);
+void DrawCircle(double x, double y, double z, double radius, int numberOfSides);
+void CalcAvgRadius(
+	std::vector<Plant> *plants,
+	std::map<AgeTypeId, double> *averageRadiuses, AgeTypeId ageTypeId
+);
 
 int main(void)
 {
+	AgeType se, p, j, im, v, g1, g2, g3, ss, s;
 	double seconds = 0.0;
-	GLfloat passedYears = 0.0;
+	double passedYears = 0.0;
 	std::vector<Plant> plants;
-	std::map<AgeTypes, GLfloat> averageRadiuses;
+	std::map<AgeTypeId, double> averageRadiuses;
+
+	se.SetId(AgeTypeId::seId);
+	se.SetName("se");
+	se.SetMinAge(1);
+	se.SetMaxAge(1);
+	p.SetId(AgeTypeId::pId);
+	p.SetName("p");
+	p.SetMinAge(1);
+	p.SetMaxAge(1);
+	j.SetId(AgeTypeId::jId);
+	j.SetName("j");
+	j.SetMinAge(1);
+	j.SetMaxAge(1);
+	im.SetId(AgeTypeId::imId);
+	im.SetName("im");
+	im.SetMinAge(1);
+	im.SetMaxAge(3);
+	v.SetId(AgeTypeId::vId);
+	v.SetName("v");
+	v.SetMinAge(1);
+	v.SetMaxAge(5);
+	g1.SetId(AgeTypeId::g1Id);
+	g1.SetName("g1");
+	g1.SetMinAge(1);
+	g1.SetMaxAge(4);
+	g2.SetId(AgeTypeId::g2Id);
+	g2.SetName("g2");
+	g2.SetMinAge(5);
+	g2.SetMaxAge(5);
+	g3.SetId(AgeTypeId::g3Id);
+	g3.SetName("g3");
+	g3.SetMinAge(1);
+	g3.SetMaxAge(2);
+	ss.SetId(AgeTypeId::ssId);
+	ss.SetName("ss");
+	ss.SetMinAge(1);
+	ss.SetMaxAge(2);
+	s.SetId(AgeTypeId::sId);
+	s.SetName("s");
+	s.SetMinAge(1);
+	s.SetMaxAge(2);
 
 	plants.push_back(Plant(0.24243, 4.50999, 0, static_cast<GLfloat>(12./30/2), g1, 10.0));
 	plants.push_back(Plant(0.27837, 0.41184, 0, static_cast<GLfloat>(13./30/2), g3, 19.0));
@@ -136,17 +96,23 @@ int main(void)
 		std::cout << "Index = " << i - plants.begin() << std::endl;
 		i->Print();
 	}
-	calcAvgRadius(&plants, &averageRadiuses, p);
-	calcAvgRadius(&plants, &averageRadiuses, j);
-	calcAvgRadius(&plants, &averageRadiuses, im);
-	calcAvgRadius(&plants, &averageRadiuses, v);
-	calcAvgRadius(&plants, &averageRadiuses, g1);
-	calcAvgRadius(&plants, &averageRadiuses, g2);
-	calcAvgRadius(&plants, &averageRadiuses, g3);
-	calcAvgRadius(&plants, &averageRadiuses, ss);
-	calcAvgRadius(&plants, &averageRadiuses, s);
 
-	for (std::map<AgeTypes, GLfloat>::iterator it = averageRadiuses.begin(); it != averageRadiuses.end(); ++it) {
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::pId);
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::jId);
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::imId);
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::vId);
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::g1Id);
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::g2Id);
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::g3Id);
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::ssId);
+	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::sId);
+
+	for (
+		std::map<AgeTypeId, double>::iterator it = averageRadiuses.begin();
+		it != averageRadiuses.end();
+		++it
+		)
+	{
 		std::cout << it->first << " " << it->second << std::endl;
 	}
 
@@ -170,7 +136,7 @@ int main(void)
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
 
-	glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT); // specifies the part of the window to which OpenGL will draw (in pixels), convert from normalised to pixels
+	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); // specifies the part of the window to which OpenGL will draw (in pixels), convert from normalised to pixels
 	glMatrixMode(GL_PROJECTION); // projection matrix defines the properties of the camera that views the objects in the world coordinate frame. Here you typically set the zoom factor, aspect ratio and the near and far clipping planes
 	glLoadIdentity(); // replace the current matrix with the identity matrix and starts us a fresh because matrix transforms such as glOrpho and glRotate cumulate, basically puts us at (0, 0, 0)
 	glOrtho(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, 0, 1); // essentially set coordinate system
@@ -183,78 +149,86 @@ int main(void)
 		glClear(GL_COLOR_BUFFER_BIT);
 
 		// render OpenGL here
-		//drawCircle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0, 12, 10);
-		//drawCircle(30, 40, 0, 12, 10);
 		seconds = glfwGetTime();
 		std::cout << seconds << std::endl;
 
-		//std::fesetround(FE_DOWNWARD);
-		//passedYears = std::nearbyint(seconds / 10);
 		passedYears = seconds / 3;
-		//std::cout << passedYears << std::endl;
 
 		std::vector<int> plantsToDeleteIdx;
 
-		for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i) {
-			//i->SetAge(i->GetAge() + passedYears);
+		/*for (
+			std::vector<Plant>::iterator i = plants.begin();
+			i != plants.end();
+			++i
+		)
+		{
 
-			int index = i - plants.begin();
-
-			if ( i->GetAge() + passedYears > static_cast<int>(i->GetAgeType()) ) {
+			int index = static_cast<int>(i - plants.begin());
+			
+			if ( i->GetAge() + passedYears > i->GetAgeType().GetMaxAge() )
+			{
 				std::cout << "Switching ages!" << std::endl;
-				switch (i->GetAgeType()) {
-					case p:
+
+				switch (i->GetAgeType().GetId())
+				{
+				case AgeTypeId::seId:
+					i->SetAgeType(p);
+					i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
+					break;
+				case AgeTypeId::pId:
 						i->SetAgeType(j);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
-					case j:
+				case AgeTypeId::jId:
 						i->SetAgeType(im);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
-					case im:
+				case AgeTypeId::imId:
 						i->SetAgeType(v);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
-					case v:
+				case AgeTypeId::vId:
 						i->SetAgeType(g1);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
-					case g1:
+				case AgeTypeId::g1Id:
 						i->SetAgeType(g2);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
-					case g2:
+				case AgeTypeId::g2Id:
 						i->SetAgeType(g3);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
-					case g3:
+				case AgeTypeId::g3Id:
 						i->SetAgeType(ss);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
-					case ss:
+				case AgeTypeId::ssId:
 						i->SetAgeType(s);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
-					case s:
+				case AgeTypeId::sId:
 						plantsToDeleteIdx.push_back(index);
-						i->SetRadius(averageRadiuses[i->GetAgeType()]);
+						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				}
 			}
 		}
+
 		std::sort(plantsToDeleteIdx.begin(), plantsToDeleteIdx.end(), [](int a, int b) {return a > b; });
+
 		for (std::vector<int>::iterator i = plantsToDeleteIdx.begin(); i != plantsToDeleteIdx.end(); ++i) {
 			std::cout << "Vector size = " << plants.size() << std::endl;
 			std::cout << "Will delete element with index " << *i << std::endl;
 			plants.erase(plants.begin() + *i);
-		}
+		}*/
 
 		for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i) {
-			GLfloat windowX = (i->GetX() * SCREEN_WIDTH) / 5;
-			GLfloat windowY = (i->GetY() * SCREEN_HEIGHT) / 5;
-			GLfloat windowRadius = (i->GetRadius() * SCREEN_HEIGHT) / 5;
-			//std::cout << windowRadius << std::endl;
-			drawCircle(windowX, windowY, i->GetZ(), windowRadius, 10);
+			double windowX = (i->GetX() * SCREEN_WIDTH) / 5;
+			double windowY = (i->GetY() * SCREEN_HEIGHT) / 5;
+			double windowZ = i->GetZ();
+			double windowRadius = (i->GetRadius() * SCREEN_HEIGHT) / 5;
+			DrawCircle(windowX, windowY, windowZ, windowRadius, 10);
 		}
 
 		// Swap front and back buffers
@@ -269,15 +243,15 @@ int main(void)
 	return 0;
 }
 
-void drawCircle(GLfloat x, GLfloat y, GLfloat z, GLfloat radius, GLint numberOfSides)
+void DrawCircle(double x, double y, double z, double radius, int numberOfSides)
 {
 	const int numberOfVertices = numberOfSides + 2;
 
-	const GLfloat twicePi = static_cast<GLfloat>(2.0f * M_PI);
+	const double twicePi = 2.0f * M_PI;
 
-	GLfloat circleVerticesX[12];
-	GLfloat circleVerticesY[12];
-	GLfloat circleVerticesZ[12];
+	double circleVerticesX[12];
+	double circleVerticesY[12];
+	double circleVerticesZ[12];
 
 	circleVerticesX[0] = x;
 	circleVerticesY[0] = y;
@@ -290,7 +264,7 @@ void drawCircle(GLfloat x, GLfloat y, GLfloat z, GLfloat radius, GLint numberOfS
 		circleVerticesZ[i] = z;
 	}
 
-	GLfloat allCircleVertices[(12) * 3];
+	double allCircleVertices[(12) * 3];
 
 	for (int i = 0; i < numberOfVertices; i++)
 	{
@@ -305,24 +279,29 @@ void drawCircle(GLfloat x, GLfloat y, GLfloat z, GLfloat radius, GLint numberOfS
 	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void calcAvgRadius(std::vector<Plant> *plants, std::map<AgeTypes, GLfloat> *averageRadiuses, AgeTypes ageType) {
-	GLint ageCount = 0;
+void CalcAvgRadius(
+	std::vector<Plant> *plants,
+	std::map<AgeTypeId, double> *averageRadiuses,
+	AgeTypeId ageTypeId
+)
+{
+	int ageCount = 0;
 
-	std::map<AgeTypes, GLfloat>::iterator it = averageRadiuses->find(ageType);
+	std::map<AgeTypeId, double>::iterator it = averageRadiuses->find(ageTypeId);
 	if (it != averageRadiuses->end()) {
 		it->second = 0;
 	}
 	else {
-		averageRadiuses->insert(std::pair<AgeTypes, GLfloat>(ageType, 0));
+		averageRadiuses->insert(std::pair<AgeTypeId, double>(ageTypeId, 0));
 	}
 
 	for (std::vector<Plant>::iterator i = plants->begin(); i != plants->end(); ++i) {
-		if (i->GetAgeType() == ageType) {
-			averageRadiuses->find(ageType)->second += i->GetRadius();
+		if (i->GetAgeType().GetId() == ageTypeId) {
+			averageRadiuses->find(ageTypeId)->second += i->GetRadius();
 			++ageCount;
 		}
 	}
 
 	if(ageCount > 0)
-		averageRadiuses->at(ageType) /= ageCount;
+		averageRadiuses->at(ageTypeId) /= ageCount;
 }
