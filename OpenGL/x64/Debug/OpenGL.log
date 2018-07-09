@@ -21,4 +21,16 @@ e:\dev\cpp\final-paper\opengl\src\application.cpp(90): warning C4305: 'argument'
 e:\dev\cpp\final-paper\opengl\src\application.cpp(91): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
 e:\dev\cpp\final-paper\opengl\src\application.cpp(92): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
 e:\dev\cpp\final-paper\opengl\src\application.cpp(93): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+e:\dev\cpp\final-paper\opengl\src\application.cpp(139): warning C4244: 'argument': conversion from 'float' to 'GLint', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(176): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(181): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(186): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(191): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(196): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(201): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(206): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(211): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(216): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(240): warning C4244: 'argument': conversion from 'double' to 'float', possible loss of data
+e:\dev\cpp\final-paper\opengl\src\application.cpp(273): warning C4305: 'initializing': truncation from 'double' to 'float'
   OpenGL.vcxproj -> E:\dev\cpp\final-paper\x64\Debug\OpenGLx64.exe

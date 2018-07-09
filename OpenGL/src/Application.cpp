@@ -15,7 +15,7 @@
 #define SCREEN_WIDTH 600
 #define SCREEN_HEIGHT 600
 
-void DrawCircle(double x, double y, double z, double radius, int numberOfSides);
+void DrawCircle(float x, float y, float z, float radius, int numberOfSides);
 void CalcAvgRadius(
 	std::vector<Plant> *plants,
 	std::map<AgeTypeId, double> *averageRadiuses, AgeTypeId ageTypeId
@@ -136,12 +136,12 @@ int main(void)
 	// Make the window's context current
 	glfwMakeContextCurrent(window);
 
-	glViewport(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT); // specifies the part of the window to which OpenGL will draw (in pixels), convert from normalised to pixels
-	glMatrixMode(GL_PROJECTION); // projection matrix defines the properties of the camera that views the objects in the world coordinate frame. Here you typically set the zoom factor, aspect ratio and the near and far clipping planes
-	glLoadIdentity(); // replace the current matrix with the identity matrix and starts us a fresh because matrix transforms such as glOrpho and glRotate cumulate, basically puts us at (0, 0, 0)
-	glOrtho(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, 0, 1); // essentially set coordinate system
-	glMatrixMode(GL_MODELVIEW); // (default matrix mode) modelview matrix defines how your objects are transformed (meaning translation, rotation and scaling) in your world
-	glLoadIdentity(); // same as above comment
+	glViewport(0.0f, 0.0f, SCREEN_WIDTH, SCREEN_HEIGHT);
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(0, SCREEN_WIDTH, 0, SCREEN_HEIGHT, 0, 1);
+	glMatrixMode(GL_MODELVIEW); 
+	glLoadIdentity();
 					  
 	// Loop until the user closes the window
 	while (!glfwWindowShouldClose(window))
@@ -156,7 +156,7 @@ int main(void)
 
 		std::vector<int> plantsToDeleteIdx;
 
-		/*for (
+		for (
 			std::vector<Plant>::iterator i = plants.begin();
 			i != plants.end();
 			++i
@@ -165,7 +165,7 @@ int main(void)
 
 			int index = static_cast<int>(i - plants.begin());
 			
-			if ( i->GetAge() + passedYears > i->GetAgeType().GetMaxAge() )
+			if ((passedYears - i->GetAgeAccumulated()) > i->GetAgeType().GetMaxAge())
 			{
 				std::cout << "Switching ages!" << std::endl;
 
@@ -173,38 +173,47 @@ int main(void)
 				{
 				case AgeTypeId::seId:
 					i->SetAgeType(p);
+					i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 					i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 					break;
 				case AgeTypeId::pId:
 						i->SetAgeType(j);
+						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				case AgeTypeId::jId:
 						i->SetAgeType(im);
+						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				case AgeTypeId::imId:
 						i->SetAgeType(v);
+						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				case AgeTypeId::vId:
 						i->SetAgeType(g1);
+						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				case AgeTypeId::g1Id:
 						i->SetAgeType(g2);
+						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				case AgeTypeId::g2Id:
 						i->SetAgeType(g3);
+						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				case AgeTypeId::g3Id:
 						i->SetAgeType(ss);
+						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				case AgeTypeId::ssId:
 						i->SetAgeType(s);
+						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
 						i->SetRadius(averageRadiuses[i->GetAgeType().GetId()]);
 						break;
 				case AgeTypeId::sId:
@@ -221,7 +230,7 @@ int main(void)
 			std::cout << "Vector size = " << plants.size() << std::endl;
 			std::cout << "Will delete element with index " << *i << std::endl;
 			plants.erase(plants.begin() + *i);
-		}*/
+		}
 
 		for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i) {
 			double windowX = (i->GetX() * SCREEN_WIDTH) / 5;
@@ -230,6 +239,20 @@ int main(void)
 			double windowRadius = (i->GetRadius() * SCREEN_HEIGHT) / 5;
 			DrawCircle(windowX, windowY, windowZ, windowRadius, 10);
 		}
+
+		/*glBegin(GL_TRIANGLES);
+		glVertex3f(-0.5f, -0.5f, 0);
+		glVertex3f(0.0f, 0.5f, 0);
+		glVertex3f(0.5f, -0.5f, 0);
+		glEnd();*/
+
+		/*glBegin(GL_TRIANGLES);
+		glVertex3f(10.5f, 10.5f, 0);
+		glVertex3f(20.0f, 20.5f, 0);
+		glVertex3f(40.5f, 10.5f, 0);
+		glEnd();*/
+
+		//DrawCircle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0.0f, 120.0f, 10);
 
 		// Swap front and back buffers
 		glfwSwapBuffers(window);
@@ -243,15 +266,15 @@ int main(void)
 	return 0;
 }
 
-void DrawCircle(double x, double y, double z, double radius, int numberOfSides)
+void DrawCircle(float x, float y, float z, float radius, int numberOfSides)
 {
 	const int numberOfVertices = numberOfSides + 2;
 
-	const double twicePi = 2.0f * M_PI;
+	const float twicePi = 2.0f * M_PI;
 
-	double circleVerticesX[12];
-	double circleVerticesY[12];
-	double circleVerticesZ[12];
+	float circleVerticesX[12];
+	float circleVerticesY[12];
+	float circleVerticesZ[12];
 
 	circleVerticesX[0] = x;
 	circleVerticesY[0] = y;
@@ -264,7 +287,7 @@ void DrawCircle(double x, double y, double z, double radius, int numberOfSides)
 		circleVerticesZ[i] = z;
 	}
 
-	double allCircleVertices[(12) * 3];
+	float allCircleVertices[(12) * 3];
 
 	for (int i = 0; i < numberOfVertices; i++)
 	{

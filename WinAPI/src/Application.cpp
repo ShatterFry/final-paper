@@ -87,7 +87,6 @@ int WINAPI WinMain(
 
 		glDrawArrays(GL_TRIANGLES, 0, 3);
 
-
 		/* Swap front and back buffers */
 		glfwSwapBuffers(window);
 
