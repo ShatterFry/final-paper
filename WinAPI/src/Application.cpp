@@ -7,6 +7,52 @@
 #include <locale>
 #include <codecvt>
 
+#include <iostream>
+#include <fstream>
+
+std::ofstream myCustomLogFile;
+
+static unsigned int CompileShader(unsigned int type, const std::string& source)
+{
+	unsigned int id = glCreateShader(type);
+	const char* src = source.c_str();
+	glShaderSource(id, 1, &src, nullptr);
+	glCompileShader(id);
+
+	int result;
+	glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+	if (result == GL_FALSE)
+	{
+		int length;
+		glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+		char* message = (char*)alloca(length * sizeof(char));
+		glGetShaderInfoLog(id, length, &length, message);
+		myCustomLogFile << "Failed to compile " <<
+			(type == GL_VERTEX_SHADER ? "vertex" : "fragment") <<
+			" shader!\n";
+		myCustomLogFile << message << "\n";
+		glDeleteShader(id);
+		return 0;
+	}
+
+	return id;
+}
+
+static unsigned int CreateShader(const std::string& vertexShader,
+	const std::string& fragmentShader)
+{
+	unsigned int program = glCreateProgram();
+	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
+	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
+	glAttachShader(program, vs);
+	glAttachShader(program, fs);
+	glLinkProgram(program);
+	glValidateProgram(program);
+	glDeleteShader(vs);
+	glDeleteShader(fs);
+	return program;
+}
+
 //TCHAR* Simple = (TCHAR*)TEXT("Простое окно...");
 TCHAR* Simple = const_cast<TCHAR*>(TEXT("Простое окно..."));
 
@@ -28,6 +74,11 @@ int WINAPI WinMain(
 {
 	GLFWwindow* window;
 
+	myCustomLogFile.open("myCustomLogFile.txt");
+	//myCustomLogFile << "Hello, World!\nNya!";
+
+	HANDLE myLogFile = CreateFile(TEXT("myLogFile.txt"), GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, NULL, NULL);
+
 	if (!glfwInit())
 		return -1;
 
@@ -46,9 +97,7 @@ int WINAPI WinMain(
 	}
 
 	char* openglVersion = (char*)glGetString(GL_VERSION);
-
-	HANDLE myLogFile = CreateFile(TEXT("myLogFile.txt"), GENERIC_READ | GENERIC_WRITE, 0, NULL, CREATE_ALWAYS, NULL, NULL);
-	CloseHandle(myLogFile);
+	myCustomLogFile << openglVersion;
 
 	float positions[6] = {
 		-0.5f, -0.5f,
@@ -67,6 +116,29 @@ int WINAPI WinMain(
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
 
+	std::string vertexShader =
+		"#version 330 core\n"
+		"\n"
+		"layout(location = 0) in vec4 position;\n"
+		"\n"
+		"void main()\n"
+		"{\n"
+		"	gl_Position = position;\n"
+		"}\n";
+
+	std::string fragmentShader =
+		"#version 330 core\n"
+		"\n"
+		"layout(location = 0) out vec4 color;\n"
+		"\n"
+		"void main()\n"
+		"{\n"
+		"	color = vec4(1.0, 0.0, 0.0, 1.0);\n"
+		"}\n";
+
+	unsigned int shader = CreateShader(vertexShader, fragmentShader);
+	glUseProgram(shader);
+
 	while (!glfwWindowShouldClose(window))
 	{
 		glClear(GL_COLOR_BUFFER_BIT);
@@ -78,6 +150,7 @@ int WINAPI WinMain(
 		glfwPollEvents();
 	}
 
+	glDeleteProgram(shader);
 	glfwTerminate();
 
 	WNDCLASSEX wcex;
@@ -147,6 +220,8 @@ int WINAPI WinMain(
 		DispatchMessage(&Msg);
 	}
 
+	myCustomLogFile.close();
+	CloseHandle(myLogFile);
 	return (int)Msg.wParam;
 }
 
