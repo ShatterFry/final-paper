@@ -17,6 +17,17 @@ namespace WindowsFormsApp
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new Form1());
+
+            AgeType se = new AgeType();
+            se._minAge = 1;
+            se._minAge = 1;
+
+            AgeType g1 = new AgeType();
+            g1._minAge = 1;
+            g1._maxAge = 4;
+
+            var plants = new List<Plant>();
+            plants.Add(new Plant(g1, 0.24243, 4.50999, (12/30/2)));
         }
     }
 }

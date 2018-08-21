@@ -15,11 +15,68 @@
 #define SCREEN_WIDTH 600
 #define SCREEN_HEIGHT 600
 
-void DrawCircle(float x, float y, float z, float radius, int numberOfSides);
+void DrawCircle(float x, float y, float z, float radius, int numberOfSides)
+{
+	const int numberOfVertices = numberOfSides + 2;
+
+	const float twicePi = 2.0f * M_PI;
+
+	float circleVerticesX[12];
+	float circleVerticesY[12];
+	float circleVerticesZ[12];
+
+	circleVerticesX[0] = x;
+	circleVerticesY[0] = y;
+	circleVerticesZ[0] = z;
+
+	for (int i = 1; i < numberOfVertices; i++)
+	{
+		circleVerticesX[i] = x + (radius * cos(i *  twicePi / numberOfSides));
+		circleVerticesY[i] = y + (radius * sin(i * twicePi / numberOfSides));
+		circleVerticesZ[i] = z;
+	}
+
+	float allCircleVertices[(12) * 3];
+
+	for (int i = 0; i < numberOfVertices; i++)
+	{
+		allCircleVertices[i * 3] = circleVerticesX[i];
+		allCircleVertices[(i * 3) + 1] = circleVerticesY[i];
+		allCircleVertices[(i * 3) + 2] = circleVerticesZ[i];
+	}
+
+	glEnableClientState(GL_VERTEX_ARRAY);
+	glVertexPointer(3, GL_FLOAT, 0, allCircleVertices);
+	glDrawArrays(GL_TRIANGLE_FAN, 0, numberOfVertices);
+	glDisableClientState(GL_VERTEX_ARRAY);
+}
+
 void CalcAvgRadius(
 	std::vector<Plant> *plants,
-	std::map<AgeTypeId, double> *averageRadiuses, AgeTypeId ageTypeId
-);
+	std::map<AgeTypeId, double> *averageRadiuses,
+	AgeTypeId ageTypeId
+)
+{
+	int ageCount = 0;
+
+	std::map<AgeTypeId, double>::iterator it = averageRadiuses->find(ageTypeId);
+	if (it != averageRadiuses->end()) {
+		it->second = 0;
+	}
+	else {
+		averageRadiuses->insert(std::pair<AgeTypeId, double>(ageTypeId, 0));
+	}
+
+	for (std::vector<Plant>::iterator i = plants->begin(); i != plants->end(); ++i) {
+		if (i->GetAgeType().GetId() == ageTypeId) {
+			averageRadiuses->find(ageTypeId)->second += i->GetRadius();
+			++ageCount;
+		}
+	}
+
+	if (ageCount > 0)
+		averageRadiuses->at(ageTypeId) /= ageCount;
+}
 
 int main(void)
 {
@@ -240,20 +297,6 @@ int main(void)
 			DrawCircle(windowX, windowY, windowZ, windowRadius, 10);
 		}
 
-		/*glBegin(GL_TRIANGLES);
-		glVertex3f(-0.5f, -0.5f, 0);
-		glVertex3f(0.0f, 0.5f, 0);
-		glVertex3f(0.5f, -0.5f, 0);
-		glEnd();*/
-
-		/*glBegin(GL_TRIANGLES);
-		glVertex3f(10.5f, 10.5f, 0);
-		glVertex3f(20.0f, 20.5f, 0);
-		glVertex3f(40.5f, 10.5f, 0);
-		glEnd();*/
-
-		//DrawCircle(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0.0f, 120.0f, 10);
-
 		// Swap front and back buffers
 		glfwSwapBuffers(window);
 
@@ -264,67 +307,4 @@ int main(void)
 	glfwTerminate();
 
 	return 0;
-}
-
-void DrawCircle(float x, float y, float z, float radius, int numberOfSides)
-{
-	const int numberOfVertices = numberOfSides + 2;
-
-	const float twicePi = 2.0f * M_PI;
-
-	float circleVerticesX[12];
-	float circleVerticesY[12];
-	float circleVerticesZ[12];
-
-	circleVerticesX[0] = x;
-	circleVerticesY[0] = y;
-	circleVerticesZ[0] = z;
-
-	for (int i = 1; i < numberOfVertices; i++)
-	{
-		circleVerticesX[i] = x + (radius * cos(i *  twicePi / numberOfSides));
-		circleVerticesY[i] = y + (radius * sin(i * twicePi / numberOfSides));
-		circleVerticesZ[i] = z;
-	}
-
-	float allCircleVertices[(12) * 3];
-
-	for (int i = 0; i < numberOfVertices; i++)
-	{
-		allCircleVertices[i * 3] = circleVerticesX[i];
-		allCircleVertices[(i * 3) + 1] = circleVerticesY[i];
-		allCircleVertices[(i * 3) + 2] = circleVerticesZ[i];
-	}
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, allCircleVertices);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, numberOfVertices);
-	glDisableClientState(GL_VERTEX_ARRAY);
-}
-
-void CalcAvgRadius(
-	std::vector<Plant> *plants,
-	std::map<AgeTypeId, double> *averageRadiuses,
-	AgeTypeId ageTypeId
-)
-{
-	int ageCount = 0;
-
-	std::map<AgeTypeId, double>::iterator it = averageRadiuses->find(ageTypeId);
-	if (it != averageRadiuses->end()) {
-		it->second = 0;
-	}
-	else {
-		averageRadiuses->insert(std::pair<AgeTypeId, double>(ageTypeId, 0));
-	}
-
-	for (std::vector<Plant>::iterator i = plants->begin(); i != plants->end(); ++i) {
-		if (i->GetAgeType().GetId() == ageTypeId) {
-			averageRadiuses->find(ageTypeId)->second += i->GetRadius();
-			++ageCount;
-		}
-	}
-
-	if(ageCount > 0)
-		averageRadiuses->at(ageTypeId) /= ageCount;
 }
