@@ -248,12 +248,20 @@ int main(void)
 		VertexArray va;
 		VertexBuffer vb(positions, 4 * 4 * sizeof(float));
 
+		VertexArray vaLines;
+		VertexBuffer vbLines(linePositions, 2 * 4 * sizeof(float));
+
 		VertexBufferLayout layout;
 		layout.Push<float>(2);
 		layout.Push<float>(2);
 		va.AddBuffer(vb, layout);
 
+		VertexBufferLayout layoutLines;
+		layoutLines.Push<float>(2);
+		vaLines.AddBuffer(vbLines, layoutLines);
+
 		IndexBuffer ib(indices, 6);
+		IndexBuffer ibLines(lineIndices, 2 * 4);
 
 		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
 		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
@@ -270,6 +278,10 @@ int main(void)
 		vb.Unbind();
 		ib.Unbind();
 		shader.Unbind();
+
+		vaLines.Unbind();
+		vbLines.Unbind();
+		ibLines.Unbind();
 
 		Renderer renderer;
 
@@ -297,6 +309,7 @@ int main(void)
 				glm::mat4 mvp = proj * view * model;
 				shader.Bind();
 				shader.SetUniformMat4f("u_MVP", mvp);
+				shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
 				renderer.Draw(va, ib, shader);
 			}
@@ -306,8 +319,20 @@ int main(void)
 				glm::mat4 mvp = proj * view * model;
 				shader.Bind();
 				shader.SetUniformMat4f("u_MVP", mvp);
+				shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 
 				renderer.Draw(va, ib, shader);
+			}
+
+			glm::vec3 translationLines(0, 0, 0);
+			{
+				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationLines);
+				glm::mat4 mvp = proj * view * model;
+				shader.Bind();
+				shader.SetUniformMat4f("u_MVP", mvp);
+				shader.SetUniform4f("u_Color", 1.0f, 0.3f, 0.3f, 1.0f);
+
+				renderer.DrawGrid(vaLines, ibLines, shader);
 			}
 
 			if (r > 1.0f) {
