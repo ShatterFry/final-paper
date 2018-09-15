@@ -27,68 +27,84 @@
 
 #include <AgeType.h>
 #include <Plant.h>
+#include <Point.h>
 
-void DrawCircle(float x, float y, float z, float radius, int numberOfSides)
+void GenerateCirclePoints(Point2f center, const float radius, const int numberOfSides, std::vector<Point2f>* arrayToFill)
 {
-	const int numberOfVertices = numberOfSides + 2;
+	std::vector<Point2f> circlePoints;
 
-	const float twicePi = 2.0f * M_PI;
+	circlePoints.push_back(center);
 
-	float circleVerticesX[12];
-	float circleVerticesY[12];
-	float circleVerticesZ[12];
+	float rotationAngleDegrees = 360.0f / numberOfSides;
+	float rotationAngleRadians = rotationAngleDegrees * M_PI / 180.0f;
 
-	circleVerticesX[0] = x;
-	circleVerticesY[0] = y;
-	circleVerticesZ[0] = z;
-
-	for (int i = 1; i < numberOfVertices; i++)
+	for (int i = 1; i < numberOfSides + 2; ++i)
 	{
-		circleVerticesX[i] = x + (radius * cos(i *  twicePi / numberOfSides));
-		circleVerticesY[i] = y + (radius * sin(i * twicePi / numberOfSides));
-		circleVerticesZ[i] = z;
+		float xRotated = center._x + radius * cos(rotationAngleRadians * (i - 1));
+		float yRotated = center._y + radius * sin(rotationAngleRadians * (i - 1));
+		circlePoints.push_back(Point2f(xRotated, yRotated));
 	}
 
-	float allCircleVertices[(12) * 3];
-
-	for (int i = 0; i < numberOfVertices; i++)
+	for (int i = 0; i < circlePoints.size(); ++i)
 	{
-		allCircleVertices[i * 3] = circleVerticesX[i];
-		allCircleVertices[(i * 3) + 1] = circleVerticesY[i];
-		allCircleVertices[(i * 3) + 2] = circleVerticesZ[i];
+		arrayToFill->push_back(circlePoints.at(i));
 	}
-
-	glEnableClientState(GL_VERTEX_ARRAY);
-	glVertexPointer(3, GL_FLOAT, 0, allCircleVertices);
-	glDrawArrays(GL_TRIANGLE_FAN, 0, numberOfVertices);
-	glDisableClientState(GL_VERTEX_ARRAY);
 }
 
-void CalcAvgRadius(
-	std::vector<Plant> *plants,
-	std::map<AgeTypeId, double> *averageRadiuses,
-	AgeTypeId ageTypeId
-)
+void FillFloatVectorFromPoints(std::vector<Point2f>* source, std::vector<float>* dest)
+{
+	for (int i = 0; i < source->size(); ++i)
+	{
+		dest->push_back(source->at(i)._x);
+		dest->push_back(source->at(i)._y);
+	}
+}
+
+void PrintArray(std::vector<float>* array)
+{
+	for (int i = 0; i < array->size(); ++i)
+	{
+		std::cout << "[" << i << "]" << " = " << array->at(i) << std::endl;
+	}
+}
+
+void FillIndices(int numberOfSides, std::vector<unsigned int>* indices)
+{
+	for (int i = 0; i < numberOfSides; ++i)
+	{
+		indices->push_back(0);
+		indices->push_back(i + 1);
+		indices->push_back(i + 2);
+	}
+}
+
+void CalcAvgRadius(std::vector<Plant> *plants, std::map<AgeTypeId, double> *averageRadiuses, AgeTypeId ageTypeId)
 {
 	int ageCount = 0;
 
 	std::map<AgeTypeId, double>::iterator it = averageRadiuses->find(ageTypeId);
-	if (it != averageRadiuses->end()) {
+	if (it != averageRadiuses->end())
+	{
 		it->second = 0;
 	}
-	else {
+	else
+	{
 		averageRadiuses->insert(std::pair<AgeTypeId, double>(ageTypeId, 0));
 	}
 
-	for (std::vector<Plant>::iterator i = plants->begin(); i != plants->end(); ++i) {
-		if (i->GetAgeType().GetId() == ageTypeId) {
+	for (std::vector<Plant>::iterator i = plants->begin(); i != plants->end(); ++i)
+	{
+		if (i->GetAgeType().GetId() == ageTypeId)
+		{
 			averageRadiuses->find(ageTypeId)->second += i->GetRadius();
 			++ageCount;
 		}
 	}
 
 	if (ageCount > 0)
+	{
 		averageRadiuses->at(ageTypeId) /= ageCount;
+	}
 }
 
 int main(void)
@@ -162,9 +178,10 @@ int main(void)
 	plants.push_back(Plant(3.97167, 3.67674, 0, static_cast<GLfloat>(12./30/2), g3, 19.0));
 	plants.push_back(Plant(4.36764, 0.33888, 0, static_cast<GLfloat>(15./30/2), ss, 21.0));
 
-	for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i) {
-		std::cout << "Index = " << i - plants.begin() << std::endl;
-		i->Print();
+	for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i)
+	{
+		//std::cout << "Index = " << i - plants.begin() << std::endl;
+		//i->Print();
 	}
 
 	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::pId);
@@ -177,13 +194,9 @@ int main(void)
 	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::ssId);
 	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::sId);
 
-	for (
-		std::map<AgeTypeId, double>::iterator it = averageRadiuses.begin();
-		it != averageRadiuses.end();
-		++it
-		)
+	for (std::map<AgeTypeId, double>::iterator it = averageRadiuses.begin(); it != averageRadiuses.end(); ++it)
 	{
-		std::cout << it->first << " " << it->second << std::endl;
+		//std::cout << it->first << " " << it->second << std::endl;
 	}
 
 	GLFWwindow *window;
@@ -230,6 +243,21 @@ int main(void)
 			250.0f, 0.0f
 		};
 
+		/*float circlePositions[] = {
+			0.0f, 0.0f,
+			125.0f, 250.0f,
+			250.0f, 0.0f,
+		};*/
+		int circlesNumOfSides = 10;
+		int circlesPositionsPointsNum = circlesNumOfSides + 1;
+		std::vector<Point2f> circlesPositionsPoints;
+		int circlePositionsNum = circlesPositionsPointsNum * 2;
+		std::vector<float> circlePositions;
+
+		GenerateCirclePoints(Point2f(100.0f, 100.0f), 100.0f, circlesNumOfSides, &circlesPositionsPoints);
+		FillFloatVectorFromPoints(&circlesPositionsPoints, &circlePositions);
+		PrintArray(&circlePositions);
+
 		unsigned int indices[] = {
 			0, 1, 2,
 			2, 3, 0
@@ -242,6 +270,10 @@ int main(void)
 			3, 0
 		};
 
+		//std::vector<unsigned int> circleIndices = {0, 1, 2, 0, 2, 3};
+		std::vector<unsigned int> circleIndices;
+		FillIndices(circlesNumOfSides, &circleIndices);
+
 		GLCall(glEnable(GL_BLEND));
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
@@ -250,6 +282,9 @@ int main(void)
 
 		VertexArray vaLines;
 		VertexBuffer vbLines(linePositions, 2 * 4 * sizeof(float));
+
+		VertexArray vaCircles;
+		VertexBuffer vbCircles(circlePositions.data(), 2 * circlePositions.size() * sizeof(float));
 
 		VertexBufferLayout layout;
 		layout.Push<float>(2);
@@ -260,8 +295,13 @@ int main(void)
 		layoutLines.Push<float>(2);
 		vaLines.AddBuffer(vbLines, layoutLines);
 
+		VertexBufferLayout circlesLayout;
+		circlesLayout.Push<float>(2);
+		vaCircles.AddBuffer(vbCircles, circlesLayout);
+
 		IndexBuffer ib(indices, 6);
 		IndexBuffer ibLines(lineIndices, 2 * 4);
+		IndexBuffer ibCircles(circleIndices.data(), circleIndices.size());
 
 		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
 		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
@@ -282,6 +322,10 @@ int main(void)
 		vaLines.Unbind();
 		vbLines.Unbind();
 		ibLines.Unbind();
+
+		vaCircles.Unbind();
+		vbCircles.Unbind();
+		ibCircles.Unbind();
 
 		Renderer renderer;
 
@@ -333,6 +377,17 @@ int main(void)
 				shader.SetUniform4f("u_Color", 1.0f, 0.3f, 0.3f, 1.0f);
 
 				renderer.DrawGrid(vaLines, ibLines, shader);
+			}
+
+			glm::vec3 translationCircles(0, 0, 0);
+			{
+				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationCircles);
+				glm::mat4 mvp = proj * view * model;
+				shader.Bind();
+				shader.SetUniformMat4f("u_MVP", mvp);
+				shader.SetUniform4f("u_Color", 0.1f, 0.1f, 1.0f, 1.0f);
+
+				renderer.Draw(vaCircles, ibCircles, shader);
 			}
 
 			if (r > 1.0f) {
