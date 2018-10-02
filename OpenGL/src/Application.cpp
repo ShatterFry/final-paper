@@ -10,12 +10,7 @@
 #include <algorithm>
 
 #include <Renderer.h>
-
-#include <VertexBuffer.h>
 #include <VertexBufferLayout.h>
-#include <IndexBuffer.h>
-#include <VertexArray.h>
-#include <Shader.h>
 #include <Texture.h>
 
 #include <glm/glm.hpp>
@@ -27,37 +22,46 @@
 
 #include <AgeType.h>
 #include <Plant.h>
+
 #include <Point.h>
+#include <Circle.h>
+#include <Rectangle.h>
+#include <Aliases.h>
+#include <Grid.h>
 
-void GenerateCirclePoints(Point2f center, const float radius, const int numberOfSides, std::vector<Point2f>* arrayToFill)
+std::shared_ptr<FloatVector> Decompose(const std::shared_ptr<Circle>& circle)
 {
-	std::vector<Point2f> circlePoints;
+	auto decomposition = std::make_shared<std::vector<float>>();
 
-	circlePoints.push_back(center);
+	const std::shared_ptr<std::vector<Point2f>>& points = circle->GetPositionsPoints();
 
-	float rotationAngleDegrees = 360.0f / numberOfSides;
-	float rotationAngleRadians = rotationAngleDegrees * M_PI / 180.0f;
-
-	for (int i = 1; i < numberOfSides + 2; ++i)
+	for (int i = 0; i < points->size(); ++i)
 	{
-		float xRotated = center._x + radius * cos(rotationAngleRadians * (i - 1));
-		float yRotated = center._y + radius * sin(rotationAngleRadians * (i - 1));
-		circlePoints.push_back(Point2f(xRotated, yRotated));
+		decomposition->push_back(points->at(i)._x);
+		decomposition->push_back(points->at(i)._y);
 	}
 
-	for (int i = 0; i < circlePoints.size(); ++i)
-	{
-		arrayToFill->push_back(circlePoints.at(i));
-	}
+	return decomposition;
 }
 
-void FillFloatVectorFromPoints(std::vector<Point2f>* source, std::vector<float>* dest)
+std::shared_ptr<FloatVector> Decompose(const std::shared_ptr<Grid>& grid)
 {
-	for (int i = 0; i < source->size(); ++i)
+	auto decomposition = std::make_shared<std::vector<float>>();
+
+	const std::shared_ptr<LinesVector>& lines = grid->GetLines();
+	for (auto it = lines->begin(); it != lines->end(); ++it)
 	{
-		dest->push_back(source->at(i)._x);
-		dest->push_back(source->at(i)._y);
+		decomposition->push_back(it->GetBegin()._x);
+		decomposition->push_back(it->GetBegin()._y);
+
+		if (it - lines->begin() > 3)
+		{
+			decomposition->push_back(it->GetEnd()._x);
+			decomposition->push_back(it->GetEnd()._y);
+		}
 	}
+
+	return decomposition;
 }
 
 void PrintArray(std::vector<float>* array)
@@ -68,13 +72,57 @@ void PrintArray(std::vector<float>* array)
 	}
 }
 
-void FillIndices(int numberOfSides, std::vector<unsigned int>* indices)
+void FillIndices(const std::shared_ptr<Circle>& circle, const std::shared_ptr<UIntVector>& indices)
 {
-	for (int i = 0; i < numberOfSides; ++i)
+	int indicesOffset = 0;
+
+	const std::shared_ptr<Point2fVector>& positionsPoints = circle->GetPositionsPoints();
+	
+	int numOfPosPoints = positionsPoints->size();
+
+	for (int i = 0; i < numOfPosPoints-1; ++i)
 	{
-		indices->push_back(0);
+		/*indices->push_back(0);
 		indices->push_back(i + 1);
-		indices->push_back(i + 2);
+		indices->push_back(i == (numberOfSides - 1) ? 1 : (i + 2));*/
+
+		// 0-10
+		// 0 1 2
+		// 11-21
+		// 11 12 13
+		indices->push_back(indicesOffset);
+		indices->push_back(indicesOffset + i + 1);
+		indices->push_back(i == (numOfPosPoints - 2) ? (indicesOffset + 1) : (indicesOffset + i + 2));
+	}
+	indicesOffset += numOfPosPoints;
+}
+
+void FillLineIndices(std::shared_ptr<UIntVector>& lineIndices, std::shared_ptr<Grid>& grid)
+{
+	int rectangleMaxNum = 4;
+	for (int i = 0; i < rectangleMaxNum; ++i)
+	{
+		lineIndices->push_back(i);
+		if (i < rectangleMaxNum - 1)
+		{
+			lineIndices->push_back(i+1);
+		}
+		else
+		{
+			lineIndices->push_back(0);
+		}
+	}
+
+	std::shared_ptr<LinesVector> gridLines = grid->GetLines();
+	int allLinesCount = gridLines->size();
+	int additionalLinesCount = allLinesCount - 4;
+	if(allLinesCount > 4)
+	{
+		for (int i = 4; i < 4 + additionalLinesCount * 2; i+=2)
+		{
+			lineIndices->push_back(i);
+			lineIndices->push_back(i+1);
+		}
 	}
 }
 
@@ -194,11 +242,6 @@ int main(void)
 	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::ssId);
 	CalcAvgRadius(&plants, &averageRadiuses, AgeTypeId::sId);
 
-	for (std::map<AgeTypeId, double>::iterator it = averageRadiuses.begin(); it != averageRadiuses.end(); ++it)
-	{
-		//std::cout << it->first << " " << it->second << std::endl;
-	}
-
 	GLFWwindow *window;
 
 	// Initialize the library
@@ -229,62 +272,44 @@ int main(void)
 	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	{
-		float positions[] = {
+		std::shared_ptr<std::vector<float>> positions = std::make_shared<std::vector<float>>();
+		*positions = {
 			-50.0f, -50.0f, 0.0f, 0.0f, //0
 			50.0f, -50.0f, 1.0f, 0.0f, // 1
 			50.0f, 50.0f, 1.0f, 1.0f, // 2
 			-50.0f, 50.0f, 0.0f, 1.0f // 3
 		};
 
-		float linePositions[] = {
-			0.0f, 0.0f,
-			0.0f, 250.0f,
-			250.0f, 250.0f,
-			250.0f, 0.0f
-		};
+		Rectangle boundingRectangle = Rectangle( Point2f(0.0f, 0.0f), Point2f(0.0f, 250.0f), Point2f(250.0f, 250.0f), Point2f(250.0f, 0.0f) );
+		std::shared_ptr<Grid> grid = std::make_shared<Grid>(boundingRectangle, 5, 5);
+		const std::shared_ptr<FloatVector>& linesPositions = Decompose(grid);
 
-		/*float circlePositions[] = {
-			0.0f, 0.0f,
-			125.0f, 250.0f,
-			250.0f, 0.0f,
-		};*/
-		int circlesNumOfSides = 10;
-		int circlesPositionsPointsNum = circlesNumOfSides + 1;
-		std::vector<Point2f> circlesPositionsPoints;
-		int circlePositionsNum = circlesPositionsPointsNum * 2;
-		std::vector<float> circlePositions;
+		std::shared_ptr<Circle> circle = std::make_shared<Circle>(100.0f, Point2f(100.0f, 100.0f), 10);
+		const std::shared_ptr<FloatVector>& circlesPositions = Decompose(circle);
 
-		GenerateCirclePoints(Point2f(100.0f, 100.0f), 100.0f, circlesNumOfSides, &circlesPositionsPoints);
-		FillFloatVectorFromPoints(&circlesPositionsPoints, &circlePositions);
-		PrintArray(&circlePositions);
-
-		unsigned int indices[] = {
+		std::shared_ptr<UIntVector> indices = std::make_shared<UIntVector>();
+		*indices = {
 			0, 1, 2,
 			2, 3, 0
 		};
 
-		unsigned int lineIndices[] = {
-			0, 1,
-			1, 2,
-			2, 3,
-			3, 0
-		};
+		std::shared_ptr<UIntVector> lineIndices = std::make_shared<UIntVector>();
+		FillLineIndices(lineIndices, grid);
 
-		//std::vector<unsigned int> circleIndices = {0, 1, 2, 0, 2, 3};
-		std::vector<unsigned int> circleIndices;
-		FillIndices(circlesNumOfSides, &circleIndices);
+		std::shared_ptr<UIntVector> circleIndices = std::make_shared<UIntVector>();
+		FillIndices(circle, circleIndices);
 
 		GLCall(glEnable(GL_BLEND));
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
 		VertexArray va;
-		VertexBuffer vb(positions, 4 * 4 * sizeof(float));
+		VertexBuffer<float> vb(positions);
 
 		VertexArray vaLines;
-		VertexBuffer vbLines(linePositions, 2 * 4 * sizeof(float));
+		VertexBuffer<float> vbLines(linesPositions);
 
 		VertexArray vaCircles;
-		VertexBuffer vbCircles(circlePositions.data(), 2 * circlePositions.size() * sizeof(float));
+		VertexBuffer<float> vbCircles(circlesPositions);
 
 		VertexBufferLayout layout;
 		layout.Push<float>(2);
@@ -299,9 +324,9 @@ int main(void)
 		circlesLayout.Push<float>(2);
 		vaCircles.AddBuffer(vbCircles, circlesLayout);
 
-		IndexBuffer ib(indices, 6);
-		IndexBuffer ibLines(lineIndices, 2 * 4);
-		IndexBuffer ibCircles(circleIndices.data(), circleIndices.size());
+		IndexBuffer ib(indices);
+		IndexBuffer ibLines(lineIndices);
+		IndexBuffer ibCircles(circleIndices);
 
 		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
 		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));

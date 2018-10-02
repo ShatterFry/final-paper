@@ -2,6 +2,7 @@
 
 #include <vector>
 #include <Renderer.h>
+#include <Errors.h>
 
 struct VertexBufferElement {
 	unsigned int type;
