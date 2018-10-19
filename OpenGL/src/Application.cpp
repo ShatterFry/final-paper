@@ -29,21 +29,6 @@
 #include <Aliases.h>
 #include <Grid.h>
 
-std::shared_ptr<FloatVector> Decompose(const std::shared_ptr<Circle>& circle)
-{
-	auto decomposition = std::make_shared<std::vector<float>>();
-
-	const std::shared_ptr<std::vector<Point2f>>& points = circle->GetPositionsPoints();
-
-	for (int i = 0; i < points->size(); ++i)
-	{
-		decomposition->push_back(points->at(i)._x);
-		decomposition->push_back(points->at(i)._y);
-	}
-
-	return decomposition;
-}
-
 std::shared_ptr<FloatVector> Decompose(const std::shared_ptr<Grid>& grid)
 {
 	auto decomposition = std::make_shared<std::vector<float>>();
@@ -70,31 +55,6 @@ void PrintArray(std::vector<float>* array)
 	{
 		std::cout << "[" << i << "]" << " = " << array->at(i) << std::endl;
 	}
-}
-
-void FillIndices(const std::shared_ptr<Circle>& circle, const std::shared_ptr<UIntVector>& indices)
-{
-	int indicesOffset = 0;
-
-	const std::shared_ptr<Point2fVector>& positionsPoints = circle->GetPositionsPoints();
-	
-	int numOfPosPoints = positionsPoints->size();
-
-	for (int i = 0; i < numOfPosPoints-1; ++i)
-	{
-		/*indices->push_back(0);
-		indices->push_back(i + 1);
-		indices->push_back(i == (numberOfSides - 1) ? 1 : (i + 2));*/
-
-		// 0-10
-		// 0 1 2
-		// 11-21
-		// 11 12 13
-		indices->push_back(indicesOffset);
-		indices->push_back(indicesOffset + i + 1);
-		indices->push_back(i == (numOfPosPoints - 2) ? (indicesOffset + 1) : (indicesOffset + i + 2));
-	}
-	indicesOffset += numOfPosPoints;
 }
 
 void FillLineIndices(std::shared_ptr<UIntVector>& lineIndices, std::shared_ptr<Grid>& grid)
@@ -284,9 +244,6 @@ int main(void)
 		std::shared_ptr<Grid> grid = std::make_shared<Grid>(boundingRectangle, 5, 5);
 		const std::shared_ptr<FloatVector>& linesPositions = Decompose(grid);
 
-		std::shared_ptr<Circle> circle = std::make_shared<Circle>(100.0f, Point2f(100.0f, 100.0f), 10);
-		const std::shared_ptr<FloatVector>& circlesPositions = Decompose(circle);
-
 		std::shared_ptr<UIntVector> indices = std::make_shared<UIntVector>();
 		*indices = {
 			0, 1, 2,
@@ -295,9 +252,6 @@ int main(void)
 
 		std::shared_ptr<UIntVector> lineIndices = std::make_shared<UIntVector>();
 		FillLineIndices(lineIndices, grid);
-
-		std::shared_ptr<UIntVector> circleIndices = std::make_shared<UIntVector>();
-		FillIndices(circle, circleIndices);
 
 		GLCall(glEnable(GL_BLEND));
 		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -308,9 +262,6 @@ int main(void)
 		VertexArray vaLines;
 		VertexBuffer<float> vbLines(linesPositions);
 
-		VertexArray vaCircles;
-		VertexBuffer<float> vbCircles(circlesPositions);
-
 		VertexBufferLayout layout;
 		layout.Push<float>(2);
 		layout.Push<float>(2);
@@ -320,38 +271,31 @@ int main(void)
 		layoutLines.Push<float>(2);
 		vaLines.AddBuffer(vbLines, layoutLines);
 
-		VertexBufferLayout circlesLayout;
-		circlesLayout.Push<float>(2);
-		vaCircles.AddBuffer(vbCircles, circlesLayout);
-
 		IndexBuffer ib(indices);
 		IndexBuffer ibLines(lineIndices);
-		IndexBuffer ibCircles(circleIndices);
 
 		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
 		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
-		Shader shader("res/shaders/Basic.shader");
-		shader.Bind();
-		shader.SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
+		std::shared_ptr<Shader> shader = std::make_shared<Shader>("res/shaders/Basic.shader");
+		//Shader shader("res/shaders/Basic.shader");
+		shader->Bind();
+		shader->SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 
 		Texture texture("res/textures/ChernoLogo.png");
 		texture.Bind();
-		shader.SetUniform1i("u_Texture", 0);
+		shader->SetUniform1i("u_Texture", 0);
 
 		va.Unbind();
 		vb.Unbind();
 		ib.Unbind();
-		shader.Unbind();
+		shader->Unbind();
 
 		vaLines.Unbind();
 		vbLines.Unbind();
 		ibLines.Unbind();
 
-		vaCircles.Unbind();
-		vbCircles.Unbind();
-		ibCircles.Unbind();
-
+		//std::shared_ptr<Renderer> renderer = std::make_shared<Renderer>();
 		Renderer renderer;
 
 		ImGui::CreateContext();
@@ -376,43 +320,41 @@ int main(void)
 			{
 				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationA);
 				glm::mat4 mvp = proj * view * model;
-				shader.Bind();
-				shader.SetUniformMat4f("u_MVP", mvp);
-				shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+				shader->Bind();
+				shader->SetUniformMat4f("u_MVP", mvp);
+				shader->SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+				EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 
-				renderer.Draw(va, ib, shader);
+				renderer.Draw(va, ib, shader, drawType);
 			}
 
 			{
 				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationB);
 				glm::mat4 mvp = proj * view * model;
-				shader.Bind();
-				shader.SetUniformMat4f("u_MVP", mvp);
-				shader.SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+				shader->Bind();
+				shader->SetUniformMat4f("u_MVP", mvp);
+				shader->SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
+				EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 
-				renderer.Draw(va, ib, shader);
+				renderer.Draw(va, ib, shader, drawType);
 			}
 
 			glm::vec3 translationLines(0, 0, 0);
 			{
 				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationLines);
 				glm::mat4 mvp = proj * view * model;
-				shader.Bind();
-				shader.SetUniformMat4f("u_MVP", mvp);
-				shader.SetUniform4f("u_Color", 1.0f, 0.3f, 0.3f, 1.0f);
+				shader->Bind();
+				shader->SetUniformMat4f("u_MVP", mvp);
+				shader->SetUniform4f("u_Color", 1.0f, 0.3f, 0.3f, 1.0f);
+				EDrawTypes drawType = EDrawTypes::EDT_LINES;
 
-				renderer.DrawGrid(vaLines, ibLines, shader);
+				renderer.Draw(vaLines, ibLines, shader, drawType);
 			}
 
-			glm::vec3 translationCircles(0, 0, 0);
 			{
-				glm::mat4 model = glm::translate(glm::mat4(1.0f), translationCircles);
-				glm::mat4 mvp = proj * view * model;
-				shader.Bind();
-				shader.SetUniformMat4f("u_MVP", mvp);
-				shader.SetUniform4f("u_Color", 0.1f, 0.1f, 1.0f, 1.0f);
-
-				renderer.Draw(vaCircles, ibCircles, shader);
+				glm::vec3 translationCircles(0, 0, 0);
+				std::shared_ptr<Circle> circle = std::make_shared<Circle>(100.0f, Point2f(100.0f, 100.0f), 10);
+				circle->Draw(proj, view, translationCircles, shader, renderer);
 			}
 
 			if (r > 1.0f) {

@@ -1,7 +1,14 @@
 #include <Circle.h>
+
 #define _USE_MATH_DEFINES
 #include <math.h>
 #include <iostream>
+
+#include <VertexArray.h>
+#include <IndexBuffer.h>
+#include <Shader.h>
+
+#include <Renderer.h>
 
 void Circle::CalculatePoints()
 {
@@ -49,7 +56,7 @@ void Circle::SetPositionsPoints(std::shared_ptr<std::vector<Point2f>> positionsP
 	_positionsPoints = positionsPoints;
 }
 
-std::shared_ptr<std::vector<Point2f>> Circle::GetPositionsPoints()
+std::shared_ptr<Point2fVector> Circle::GetPositionsPoints()
 {
 	return _positionsPoints;
 }
@@ -57,4 +64,69 @@ std::shared_ptr<std::vector<Point2f>> Circle::GetPositionsPoints()
 int Circle::GetNumberOfSides()
 {
 	return _numberOfSides;
+}
+
+std::shared_ptr<FloatVector> Circle::Decompose()
+{
+	auto decomposition = std::make_shared<FloatVector>();
+
+	for (int i = 0; i < _positionsPoints->size(); ++i)
+	{
+		decomposition->push_back(_positionsPoints->at(i)._x);
+		decomposition->push_back(_positionsPoints->at(i)._y);
+	}
+
+	return decomposition;
+}
+
+void Circle::FillIndices()
+{
+	int indicesOffset = 0;
+
+	int numOfPosPoints = _positionsPoints->size();
+
+	for (int i = 0; i < numOfPosPoints - 1; ++i)
+	{
+		/*indices->push_back(0);
+		indices->push_back(i + 1);
+		indices->push_back(i == (numberOfSides - 1) ? 1 : (i + 2));*/
+
+		// 0-10
+		// 0 1 2
+		// 11-21
+		// 11 12 13
+		_indices->push_back(indicesOffset);
+		_indices->push_back(indicesOffset + i + 1);
+		_indices->push_back(i == (numOfPosPoints - 2) ? (indicesOffset + 1) : (indicesOffset + i + 2));
+	}
+	indicesOffset += numOfPosPoints;
+}
+
+void Circle::Draw(const glm::mat4& proj, const glm::mat4& view, const glm::vec3& translation, std::shared_ptr<Shader>& shader, const Renderer& renderer)
+{
+	const std::shared_ptr<FloatVector>& circlesPositions = Decompose();
+
+	FillIndices();
+
+	VertexArray vaCircles;
+	VertexBuffer<float> vbCircles(circlesPositions);
+
+	VertexBufferLayout circlesLayout;
+	circlesLayout.Push<float>(2);
+	vaCircles.AddBuffer(vbCircles, circlesLayout);
+
+	IndexBuffer ibCircles(_indices);
+
+	vaCircles.Unbind();
+	vbCircles.Unbind();
+	ibCircles.Unbind();
+
+	glm::mat4 model = glm::translate(glm::mat4(1.0f), translation);
+	glm::mat4 mvp = proj * view * model;
+	shader->Bind();
+	shader->SetUniformMat4f("u_MVP", mvp);
+	shader->SetUniform4f("u_Color", 0.1f, 0.1f, 1.0f, 1.0f);
+	EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
+
+	renderer.Draw(vaCircles, ibCircles, shader, drawType);
 }

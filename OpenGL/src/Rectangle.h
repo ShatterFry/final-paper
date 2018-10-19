@@ -1,6 +1,8 @@
 #pragma once
 #include <Line.h>
 
+using RectangleVector = std::vector<class Rectangle>;
+
 class Rectangle
 {
 public:
