@@ -21,7 +21,10 @@ public:
 	void SetBottomLeftPoint(const Point2f point);
 	Point2f GetBottomLeftPoint() const;
 
-	std::shared_ptr<Point2fVector> GetPointsVector() const;
+	float GetHeight() const { return _height; }
+	float GetWidht() const { return _width; }
+
+	std::shared_ptr<Point2fVector> GetPoints() const { return _points; }
 	std::shared_ptr<LinesVector> GetLines() const;
 private:
 	Point2f _bottomLeftPoint;
@@ -29,7 +32,10 @@ private:
 	Point2f _topRightPoint;
 	Point2f _bottomRightPoint;
 
-	std::shared_ptr<Point2fVector> _pointsVectorSPtr = std::make_shared<Point2fVector>();
+	float _height = 0;
+	float _width = 0;
+
+	std::shared_ptr<Point2fVector> _points = std::make_shared<Point2fVector>();
 
 	Line _leftLine;
 	Line _topLine;

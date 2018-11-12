@@ -52,10 +52,13 @@ Rectangle::Rectangle(const Point2f bottomLeft, const Point2f topLeft, const Poin
 	_topRightPoint = topRight;
 	_bottomRightPoint = bottomRight;
 
-	_pointsVectorSPtr->push_back(bottomLeft);
-	_pointsVectorSPtr->push_back(topLeft);
-	_pointsVectorSPtr->push_back(topRight);
-	_pointsVectorSPtr->push_back(bottomRight);
+	_height = topLeft._y - bottomLeft._y;
+	_width = topRight._x - topLeft._x;
+
+	_points->push_back(bottomLeft);
+	_points->push_back(topLeft);
+	_points->push_back(topRight);
+	_points->push_back(bottomRight);
 
 	_leftLine = Line(_bottomLeftPoint, _topLeftPoint);
 	_topLine = Line(_topLeftPoint, _topRightPoint);
@@ -70,11 +73,6 @@ Rectangle::Rectangle(const Point2f bottomLeft, const Point2f topLeft, const Poin
 	_lines->push_back(_topLine);
 	_lines->push_back(_rightLine);
 	_lines->push_back(_bottomLine);
-}
-
-std::shared_ptr<Point2fVector> Rectangle::GetPointsVector() const
-{
-	return _pointsVectorSPtr;
 }
 
 std::shared_ptr<LinesVector> Rectangle::GetLines() const

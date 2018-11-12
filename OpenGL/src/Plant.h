@@ -1,130 +1,58 @@
 #pragma once
+
 #include <AgeType.h>
+#include <AgeTypeDataEntry.h>
 
 class Plant {
+
 private:
-	double x, y, z, radius;
-	AgeType ageType;
-	float _ageInit;
-	float _ageAccumulated;
-	float _ageResulting;
+	int id;
+	double X, Y, Z, Radius;
+
+	EAgeType ageType;
+
+	float AgeInit;
+	float AgeAccumulated;
+	float AgeResulting;
+
+	std::vector<AgeTypeDataEntry> ageTypesData;
+
 public:
-	Plant();
-	Plant(
-		GLfloat x,
-		GLfloat y, 
-		GLfloat z,
-		GLfloat r,
-		AgeType ageType,
-		float aI
-	);
-	~Plant();
 
-	double GetX();
-	double GetY();
-	double GetZ();
-	double GetRadius();
-	AgeType GetAgeType();
-	float GetAgeInit();
-	float GetAgeAccumulated();
-	float GetAgeResulting();
+	Plant(const int id, const GLfloat x, const GLfloat y, const GLfloat z, const GLfloat radius, const EAgeType ageType, const float initialAge)
+	{
+		this->id = id;
+		this->X = x;
+		this->Y = y;
+		this->Z = z;
+		this->Radius = radius;
+		this->ageType = ageType;
+		this->AgeInit = initialAge;
+	}
 
-	void SetAgeType(AgeType ageType);
-	void SetAgeInit(float aCT);
-	void SetAgeAccumulated(float aA);
-	void SetAgeResulting();
-	void SetRadius(double radius);
+	double GetX() const { return X; }
+	double GetY() const { return Y; }
+	double GetZ() const { return Z; }
+	double GetRadius() const { return Radius; }
+	EAgeType GetAgeType() const { return this->ageType; }
+	float GetAgeInit() const { return AgeInit; };
+	float GetAgeAccumulated() const { return AgeAccumulated; };
+	float GetAgeResulting() const { return AgeResulting; };
 
-	void Print();
+	void SetAgeType(EAgeType ageType) { this->ageType = ageType; }
+	void SetAgeInit(float initialAge) { this->AgeInit = initialAge; }
+	void SetAgeAccumulated(float accumulatedAge) { this->AgeAccumulated = accumulatedAge; }
+	void SetAgeResulting(float resultingAge) { this->AgeResulting = resultingAge; }
+	void SetRadius(double radius) { this->Radius = radius; }
+
+	void Print() const
+	{
+		std::cout << "Age Init = " << this->AgeInit << std::endl;
+		std::cout << "Age Accumulated = " << this->AgeAccumulated << std::endl;
+		//std::cout << "Age Type = " << this->ageType << std::endl;
+		std::cout << "X = " << this->X << std::endl;
+		std::cout << "Y = " << this->Y << std::endl;
+		std::cout << "Z = " << this->Z << std::endl;
+		std::cout << "Radius = " << this->Radius << std::endl;
+	}
 };
-
-Plant::Plant() {
-
-}
-
-Plant::Plant(
-	GLfloat x, 
-	GLfloat y, 
-	GLfloat z, 
-	GLfloat radius, 
-	AgeType ageType, 
-	float aI
-)
-{
-	this->x = x;
-	this->y = y;
-	this->z = z;
-	this->radius = radius;
-	this->ageType = ageType;
-	this->_ageInit = aI;
-}
-
-Plant::~Plant() {
-
-}
-
-double Plant::GetX() {
-	return this->x;
-}
-
-double Plant::GetY() {
-	return this->y;
-}
-
-double Plant::GetZ() {
-	return this->z;
-}
-
-double Plant::GetRadius() {
-	return this->radius;
-}
-
-AgeType Plant::GetAgeType() {
-	return this->ageType;
-}
-
-float Plant::GetAgeAccumulated() {
-	return this->_ageAccumulated;
-}
-
-float Plant::GetAgeInit()
-{
-	return this->_ageInit;
-}
-
-float Plant::GetAgeResulting()
-{
-	return this->_ageResulting;
-}
-
-void Plant::SetAgeType(AgeType ageType) {
-	this->ageType = ageType;
-}
-
-void Plant::SetAgeAccumulated(float aA) {
-	this->_ageAccumulated = aA;
-}
-
-void Plant::SetAgeInit(float aI)
-{
-	this->_ageInit = aI;
-}
-
-void Plant::SetAgeResulting()
-{
-	this->_ageResulting = this->_ageInit + this->_ageAccumulated;
-}
-
-void Plant::SetRadius(double radius) {
-	this->radius = radius;
-}
-
-void Plant::Print() {
-	std::cout << "Age Init = " << this->_ageInit << std::endl;
-	std::cout << "Age Accumulated = " << this->_ageAccumulated << std::endl;
-	std::cout << "Age Type = " << this->ageType << std::endl;
-	std::cout << "X = " << this->x << std::endl;
-	std::cout << "Y = " << this->y << std::endl;
-	std::cout << "Z = " << this->z << std::endl;
-	std::cout << "Radius = " << this->radius << std::endl;
-}

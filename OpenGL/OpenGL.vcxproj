@@ -146,6 +146,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\AppManager.cpp" />
     <ClCompile Include="src\Circle.cpp" />
     <ClCompile Include="src\Errors.cpp" />
     <ClCompile Include="src\Grid.cpp" />
@@ -166,7 +167,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AgeType.h" />
+    <ClInclude Include="src\AgeTypeDataEntry.h" />
     <ClInclude Include="src\Aliases.h" />
+    <ClInclude Include="src\AppManager.h" />
     <ClInclude Include="src\Circle.h" />
     <ClInclude Include="src\Errors.h" />
     <ClInclude Include="src\Grid.h" />

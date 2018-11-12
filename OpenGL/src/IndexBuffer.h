@@ -2,6 +2,7 @@
 
 //#include <memory>
 #include <vector>
+#include <Aliases.h>
 
 class IndexBuffer {
 private:
@@ -9,7 +10,7 @@ private:
 	unsigned int m_Count;
 public:
 	//IndexBuffer(const unsigned int* data, unsigned int count);
-	IndexBuffer(const std::shared_ptr<std::vector<unsigned int>>& data);
+	IndexBuffer(const std::shared_ptr<UIntVector>& data);
 	~IndexBuffer();
 
 	void Bind() const;

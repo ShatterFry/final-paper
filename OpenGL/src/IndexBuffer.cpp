@@ -3,7 +3,7 @@
 #include <Errors.h>
 
 //IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
-IndexBuffer::IndexBuffer(const std::shared_ptr<std::vector<unsigned int>>& data)
+IndexBuffer::IndexBuffer(const std::shared_ptr<UIntVector>& data)
 	: m_Count(data->size())
 {
 	//m_Count = data->size();

@@ -1,5 +1,10 @@
 #pragma once
+
 #include <Rectangle.h>
+#include <Aliases.h>
+
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 
 class Grid
 {
@@ -11,7 +16,12 @@ public:
 	Rectangle GetBoundingRectangle() const;
 
 	std::shared_ptr<LinesVector> GetLines() const;
+	void Draw(const glm::mat4& proj, const glm::mat4& view, const glm::vec3& translation, std::shared_ptr<class Shader>& shader, const class Renderer& renderer);
 private:
 	Rectangle _boundingRectangle;
-	std::shared_ptr<LinesVector> _lines = std::make_shared<std::vector<Line>>();
+	std::shared_ptr<LinesVector> _lines = std::make_shared<LinesVector>();
+	std::shared_ptr<UIntVector> _lineIndices = std::make_shared<UIntVector>();
+
+	std::shared_ptr<FloatVector> Decompose() const;
+	void FillLineIndices();
 };
