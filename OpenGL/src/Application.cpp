@@ -41,7 +41,7 @@ void PrintArray(std::vector<float>* array)
 	}
 }
 
-void CalcAvgRadius(const std::vector<Plant>& plants, std::shared_ptr<AgeRadiusVector>& averageRadiuses)
+/*void CalcAvgRadius(const std::vector<Plant>& plants, std::shared_ptr<AgeRadiusVector>& averageRadiuses)
 {
 	std::vector<int> typesCount(static_cast<int>(EAgeType::MAX) - 1, 0);
 
@@ -61,39 +61,55 @@ void CalcAvgRadius(const std::vector<Plant>& plants, std::shared_ptr<AgeRadiusVe
 			averageRadiuses->at(i) /= typesCount[i];
 		}
 	}
-}
+}*/
 
 int main(void)
 {
 	//AgeType se, p, j, im, v, g1, g2, g3, ss, s;
 	AppManager appManager;
-	float seconds = 0.0f;
-	float passedYears = 0.0f;
+	float passedTime;
+	float initialTime;
+	float passedYears;
 	std::vector<Plant> plants;
 	std::shared_ptr<AgeRadiusVector> averageRadiuses = std::make_shared<AgeRadiusVector>(static_cast<int>(EAgeType::MAX) - 1, 0.0f);
+	
+	bool bProduceChildren = false;
+	bool bStartBtnClicked = false;
 
 	int halocnemumId = 0;
-	plants.push_back(Plant(halocnemumId, 0.24243f, 4.50999f, 0.0f, static_cast<GLfloat>(12./30/2), EAgeType::g1, 10.0f));
-	plants.push_back(Plant(halocnemumId, 0.27837f, 0.41184f, 0.0f, static_cast<GLfloat>(13./30/2), EAgeType::g3, 19.0f));
-	plants.push_back(Plant(halocnemumId, 0.36258f, 3.3966f, 0.0f, static_cast<GLfloat>(12./30/2), EAgeType::g1, 10.0f));
-	plants.push_back(Plant(halocnemumId, 0.62103f, 2.6586f, 0.0f, static_cast<GLfloat>(12./30/2), EAgeType::g1, 10.0f));
-	plants.push_back(Plant(halocnemumId, 0.96021f, 3.41421f, 0.0f, static_cast<GLfloat>(13./30/2), EAgeType::g2, 14.0f));
-	plants.push_back(Plant(halocnemumId, 1.15797f, 0.47283f, 0.0f, static_cast<GLfloat>(15./30/2), EAgeType::g3, 19.0f));
-	plants.push_back(Plant(halocnemumId, 1.32927f, 3.0903f, 0.0f, static_cast<GLfloat>(2.0/30/2), EAgeType::j, 1.0f));
-	plants.push_back(Plant(halocnemumId, 1.37949f, 3.23448f, 0.0f, static_cast<GLfloat>(2./30/2), EAgeType::j, 1.0f));
-	plants.push_back(Plant(halocnemumId, 1.43334f, 3.4041f, 0.0f, static_cast<GLfloat>(3./30/2), EAgeType::im, 2.0f));
-	plants.push_back(Plant(halocnemumId, 1.47093f, 3.08031f, 0.0f, static_cast<GLfloat>(2./30/2), EAgeType::j, 1.0f));
-	plants.push_back(Plant(halocnemumId, 1.63161f, 2.96799f, 0.0f, static_cast<GLfloat>(13./30/2), EAgeType::g2, 14.0f));
-	plants.push_back(Plant(halocnemumId, 1.70658f, 3.09102f, 0.0f, static_cast<GLfloat>(4./30/2), EAgeType::v, 5.0f));
-	plants.push_back(Plant(halocnemumId, 2.01927f, 0.69852f, 0.0f, static_cast<GLfloat>(15./30/2), EAgeType::g3, 19.0f));
-	plants.push_back(Plant(halocnemumId, 2.19657f, 3.59253f, 0.0f, static_cast<GLfloat>(12./30/2), EAgeType::g1, 10.0f));
-	plants.push_back(Plant(halocnemumId, 2.58516f, 2.65056f, 0.0f, static_cast<GLfloat>(12./30/2), EAgeType::g2, 14.0f));
-	plants.push_back(Plant(halocnemumId, 2.97834f, 0.49773f, 0.0f, static_cast<GLfloat>(11./30/2), EAgeType::g3, 19.0f));
-	plants.push_back(Plant(halocnemumId, 3.36951f, 3.57684f, 0.0f, static_cast<GLfloat>(15./30/2), EAgeType::ss, 21.0f));
-	plants.push_back(Plant(halocnemumId, 3.47964f, 0.69081f, 0.0f, static_cast<GLfloat>(12./30/2), EAgeType::g3, 19.0f));
-	plants.push_back(Plant(halocnemumId, 3.49155f, 2.62122f, 0.0f, static_cast<GLfloat>(10./30/2), EAgeType::s, 23.0f));
-	plants.push_back(Plant(halocnemumId, 3.97167f, 3.67674f, 0.0f, static_cast<GLfloat>(12./30/2), EAgeType::g3, 19.0f));
-	plants.push_back(Plant(halocnemumId, 4.36764f, 0.33888f, 0.0f, static_cast<GLfloat>(15./30/2), EAgeType::ss, 21.0f));
+
+	//TODO - add setting map scale in menu
+	float mapScale = 1.0f / 30.0f;
+	bool bDataWasScaled = false;
+	auto scaleToReal = [](std::vector<Plant>& inPlants, const float scale)
+	{
+		for (int i = 0; i < inPlants.size(); ++i)
+		{
+			inPlants[i].SetDiameter(inPlants[i].GetDiameter() * scale);
+		}
+	};
+
+	// TODO - scale diameters
+	plants.push_back(Plant(halocnemumId, { 0.24243f, 4.50999f, 0.0f }, (12.0f), EAgeType::g1));
+	plants.push_back(Plant(halocnemumId, { 0.27837f, 0.41184f, 0.0f }, (13.0f), EAgeType::g3));
+	plants.push_back(Plant(halocnemumId, { 0.36258f, 3.3966f, 0.0f }, (12.0f), EAgeType::g1));
+	plants.push_back(Plant(halocnemumId, { 0.62103f, 2.6586f, 0.0f }, (12.0f), EAgeType::g1));
+	plants.push_back(Plant(halocnemumId, { 0.96021f, 3.41421f, 0.0f }, (13.0f), EAgeType::g2));
+	plants.push_back(Plant(halocnemumId, { 1.15797f, 0.47283f, 0.0f }, (15.0f), EAgeType::g3));
+	plants.push_back(Plant(halocnemumId, { 1.32927f, 3.0903f, 0.0f }, (2.0f), EAgeType::j));
+	plants.push_back(Plant(halocnemumId, { 1.37949f, 3.23448f, 0.0f }, (2.0f), EAgeType::j));
+	plants.push_back(Plant(halocnemumId, { 1.43334f, 3.4041f, 0.0f }, (3.0f), EAgeType::im));
+	plants.push_back(Plant(halocnemumId, { 1.47093f, 3.08031f, 0.0f }, (2.0f), EAgeType::j));
+	plants.push_back(Plant(halocnemumId, { 1.63161f, 2.96799f, 0.0f }, (13.0f), EAgeType::g2));
+	plants.push_back(Plant(halocnemumId, { 1.70658f, 3.09102f, 0.0f }, (4.0f), EAgeType::v));
+	plants.push_back(Plant(halocnemumId, { 2.01927f, 0.69852f, 0.0f }, (15.0f), EAgeType::g3));
+	plants.push_back(Plant(halocnemumId, { 2.19657f, 3.59253f, 0.0f }, (12.0f), EAgeType::g1));
+	plants.push_back(Plant(halocnemumId, { 2.58516f, 2.65056f, 0.0f }, (12.0f), EAgeType::g2));
+	plants.push_back(Plant(halocnemumId, { 2.97834f, 0.49773f, 0.0f }, (11.0f), EAgeType::ss));
+	plants.push_back(Plant(halocnemumId, { 3.47964f, 0.69081f, 0.0f }, (12.0f), EAgeType::g3));
+	plants.push_back(Plant(halocnemumId, { 3.49155f, 2.62122f, 0.0f }, (10.0f), EAgeType::s));
+	plants.push_back(Plant(halocnemumId, { 3.97167f, 3.67674f, 0.0f }, (12.0f), EAgeType::g3));
+	plants.push_back(Plant(halocnemumId, { 4.36764f, 0.33888f, 0.0f }, (15.0f), EAgeType::ss));
 
 	for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i)
 	{
@@ -101,7 +117,7 @@ int main(void)
 		//i->Print();
 	}
 
-	CalcAvgRadius(plants, averageRadiuses);
+	//CalcAvgRadius(plants, averageRadiuses);
 
 	GLFWwindow *window;
 
@@ -209,7 +225,7 @@ int main(void)
 				shader->SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 				EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 
-				renderer.Draw(va, ib, shader, drawType);
+				//renderer.Draw(va, ib, shader, drawType);
 			}
 
 			{
@@ -220,17 +236,12 @@ int main(void)
 				shader->SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
 				EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 
-				renderer.Draw(va, ib, shader, drawType);
+				//renderer.Draw(va, ib, shader, drawType);
 			}
 
 			Rectangle boundingRectangle = Rectangle(Point2f(0.0f, 0.0f), Point2f(0.0f, 250.0f), Point2f(250.0f, 250.0f), Point2f(250.0f, 0.0f));
 			std::shared_ptr<Grid> grid = std::make_shared<Grid>(boundingRectangle, 5, 5);
 			grid->Draw(proj, view, gridTranslation, shader, renderer);
-
-			{
-				std::shared_ptr<Circle> circle = std::make_shared<Circle>(100.0f, Point2f(100.0f, 100.0f), 10);
-				//circle->Draw(proj, view, circleTranslation, shader, renderer);
-			}
 
 			if (r > 1.0f) {
 				increment = -0.05f;
@@ -241,72 +252,194 @@ int main(void)
 
 			r += increment;
 
+			float actualEcoPct = 0.498f;
 			{
-				ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.0f);
-				ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
-				ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+				//ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.0f);
+				//ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
+				//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
+				
+				ImGui::Text("1) Halocnemum strobilaceum (Pall.) M.Bieb.");
+				ImGui::Text("2) Suaeda maritima (L.) Dumort.");
+				ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");
+				ImGui::Separator();
+				ImGui::Text("Implemented niche = %.1f", actualEcoPct);
+
+				ImGui::InputFloat("Scale", &mapScale);
+
+				ImGui::Checkbox("Produce Children", &bProduceChildren);
+
+				if (ImGui::Button("Start"))
+				{
+					bStartBtnClicked = true;
+					initialTime = glfwGetTime();
+				}
 			}
 
 			ImGui::Render();
 			ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-			seconds = glfwGetTime();
-			std::cout << seconds << std::endl;
-
-			passedYears = seconds / 3;
-
-			std::vector<int> plantsToDeleteIdx;
-
-			for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i)
+			if (bStartBtnClicked)
 			{
-
-				int index = static_cast<int>(i - plants.begin());
-				
-				std::shared_ptr<AgeTypeData> plantAgeData = appManager.GetAgeTypeData(halocnemumId);
-				if ((passedYears - i->GetAgeAccumulated()) > plantAgeData->at(static_cast<int>(i->GetAgeType()) - 1).maxAge)
+				if (!bDataWasScaled)
 				{
-					std::cout << "Switching ages!" << std::endl;
+					bDataWasScaled = true;
+					scaleToReal(plants, mapScale);
+				}
 
-					EAgeType newAgeType = static_cast<EAgeType>(static_cast<int>(i->GetAgeType()) + 1);
-					if (newAgeType != EAgeType::MAX)
+				passedTime = glfwGetTime() - initialTime;
+				std::cout << passedTime << std::endl;
+
+				passedYears = passedTime / 3.0f;
+
+				std::vector<int> plantsToDeleteIdx;
+				std::vector<Plant> plantsToAdd;
+
+				for (std::vector<Plant>::iterator it = plants.begin(); it != plants.end(); ++it)
+				{
+					if ((it->GetAgeType() == EAgeType::g1 || it->GetAgeType() == EAgeType::g2 || it->GetAgeType() == EAgeType::g3) && !it->GetProducedChild() && bProduceChildren)
 					{
-						i->SetAgeType(newAgeType);
-						i->SetAgeAccumulated(i->GetAgeAccumulated() + (passedYears - i->GetAgeAccumulated()));
-						i->SetRadius(averageRadiuses->at(static_cast<int>(newAgeType) - 1));
+						auto generateRandOffset = []()
+						{
+							return (-8.0f + rand() % 10) / 16.0f;
+						};
+
+						float positionDiffX = generateRandOffset();
+						float positionDiffY = generateRandOffset();
+
+						float childX = it->GetCenter()[0] + positionDiffX;
+						float childY = it->GetCenter()[1] + positionDiffY;
+						float childZ = it->GetCenter()[2];
+
+						float childRadius = averageRadiuses->at(static_cast<int>(EAgeType::se) - 1);
+						Plant childPlant(halocnemumId, { childX, childY, childZ }, childRadius, EAgeType::se);
+						plantsToAdd.push_back(childPlant);
+						it->SetProducedChild(true);
 					}
-					else
+
+					int index = static_cast<int>(it - plants.begin());
+
+					std::vector<AgeTypeDataEntry> plantAgeData = appManager.GetAgeTypeData(halocnemumId);
+
+					int minAgeTypeDuration = plantAgeData.at(static_cast<int>(it->GetAgeType()) - 1).minAge;
+					int maxAgeTypeDuration = plantAgeData.at(static_cast<int>(it->GetAgeType()) - 1).maxAge;
+					
+					int resultingAgeDuration = minAgeTypeDuration + (maxAgeTypeDuration - minAgeTypeDuration) * actualEcoPct;
+
+					float ageIncrease = passedYears - it->GetAccumulatedAge();
+
+					if (ageIncrease > resultingAgeDuration)
 					{
-						plantsToDeleteIdx.push_back(index);
+						std::cout << "Switching ages!" << std::endl;
+
+						it->SetProducedChild(false);
+
+						EAgeType prevAgeType = it->GetAgeType();
+						EAgeType newAgeType = static_cast<EAgeType>(static_cast<int>(prevAgeType) + 1);
+						
+						if (newAgeType != EAgeType::MAX)
+						{
+							it->SetAgeType(newAgeType);
+							it->SetAccumulatedAge(it->GetAccumulatedAge() + ageIncrease);
+							int ageTypesNum = static_cast<int>(EAgeType::MAX) - 1;
+							float curtainGrowthCoeff = 1.0f / (ageTypesNum);
+
+							std::vector<float> curtainGrowthCoeffs(ageTypesNum, curtainGrowthCoeff);
+
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::se) - 1] *= 5;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::p) - 1] *= 5;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::j) - 1] *= 32;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::im) - 1] *= 5;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::v) - 1] *= 5;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::g1) - 1] *= 5;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::g2) - 1] *= 5;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::g3) - 1] *= 5;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::ss) - 1] *= 2;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::s) - 1] *= 2;
+
+							float currentDiameter = it->GetDiameter();
+
+							bool bPlantsRepulsion = false;
+
+							auto calcDistanceBetweenPlants = [](const Plant& plant1, const Plant& plant2)
+							{
+								const std::vector<float> plant1Center = plant1.GetCenter();
+								const std::vector<float> plant2Center = plant2.GetCenter();
+
+								float result =  sqrt
+									(
+										pow((plant2Center[0] - plant1Center[0]), 2) +
+										pow((plant2Center[1] - plant1Center[1]), 2)
+									)
+									- 0.5f * 0.5f * plant2.GetDiameter()
+									- 0.5f * 0.5f * plant1.GetDiameter();
+
+								return result;
+							};
+
+							float curtainGrowthIncrease;
+							const float plantsRepulseDistance = 0.2f;
+							float maxAvailableCurtainIncrease = 0.0f;
+
+							for (int i = 0; i < plants.size(); ++i)
+							{
+
+								if (i != index && calcDistanceBetweenPlants(*it, plants[i]) < plantsRepulseDistance)
+								{
+									bPlantsRepulsion = true;
+									break;
+								}
+							}
+
+							if (bPlantsRepulsion)
+							{
+								curtainGrowthIncrease = 0.0f;
+							}
+							else
+							{
+								curtainGrowthIncrease = currentDiameter * curtainGrowthCoeffs[static_cast<int>(prevAgeType) - 1];
+							}
+
+							it->SetDiameter(currentDiameter + curtainGrowthIncrease);
+						}
+						else
+						{
+							plantsToDeleteIdx.push_back(index);
+						}
 					}
 				}
-			}
 
-			std::sort(plantsToDeleteIdx.begin(), plantsToDeleteIdx.end(), [](int a, int b) {return a > b; });
+				std::sort(plantsToDeleteIdx.begin(), plantsToDeleteIdx.end(), [](int a, int b) {return a > b; });
 
-			for (std::vector<int>::iterator i = plantsToDeleteIdx.begin(); i != plantsToDeleteIdx.end(); ++i)
-			{
-				std::cout << "Vector size = " << plants.size() << std::endl;
-				std::cout << "Will delete element with index " << *i << std::endl;
-				plants.erase(plants.begin() + *i);
-			}
+				for (std::vector<int>::iterator i = plantsToDeleteIdx.begin(); i != plantsToDeleteIdx.end(); ++i)
+				{
+					std::cout << "Vector size = " << plants.size() << std::endl;
+					std::cout << "Will delete element with index " << *i << std::endl;
+					plants.erase(plants.begin() + *i);
+				}
 
-			for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i)
-			{
-				Rectangle gridSquare = grid->GetBoundingRectangle();
+				for (int i = 0; i < plantsToAdd.size(); ++i)
+				{
+					plants.emplace_back(plantsToAdd[i]);
+				}
 
-				float gridXLeft = gridSquare.GetBottomLeftPoint()._x;
-				float gridXRight = gridSquare.GetBottomRightPoint()._x;
+				for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i)
+				{
+					Rectangle gridSquare = grid->GetBoundingRectangle();
 
-				float gridYBottom = gridSquare.GetBottomLeftPoint()._y;
-				float gridYTop = gridSquare.GetTopLeftPoint()._y;
+					float gridXLeft = gridSquare.GetBottomLeftPoint()._x;
+					float gridXRight = gridSquare.GetBottomRightPoint()._x;
 
-				float windowX = gridXLeft + i->GetX() * gridSquare.GetWidht() / 5;
-				float windowY = gridYBottom + i->GetY() * gridSquare.GetHeight() / 5;
-				float windowZ = i->GetZ();
-				float windowRadius = i->GetRadius() * gridSquare.GetWidht() / 5;
+					float gridYBottom = gridSquare.GetBottomLeftPoint()._y;
+					float gridYTop = gridSquare.GetTopLeftPoint()._y;
 
-				Circle circle(windowRadius, Point2f(windowX, windowY), 10);
-				circle.Draw(proj, view, circleTranslation, shader, renderer);
+					float windowX = gridXLeft + i->GetCenter()[0] * gridSquare.GetWidht() / 5;
+					float windowY = gridYBottom + i->GetCenter()[1] * gridSquare.GetHeight() / 5;
+					float windowZ = i->GetCenter()[2];
+					float windowRadius = i->GetDiameter() * 0.5f * gridSquare.GetWidht() / 5;
+
+					Circle circle(windowRadius, Point2f(windowX, windowY), 10);
+					circle.Draw(proj, view, circleTranslation, shader, renderer);
+				}
 			}
 
 			glfwSwapBuffers(window);

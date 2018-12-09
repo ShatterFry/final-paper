@@ -2,57 +2,34 @@
 
 #include <AgeType.h>
 #include <AgeTypeDataEntry.h>
+#include <vector>
+#include <iostream>
 
 class Plant {
 
 private:
-	int id;
-	double X, Y, Z, Radius;
-
-	EAgeType ageType;
-
-	float AgeInit;
-	float AgeAccumulated;
-	float AgeResulting;
-
-	std::vector<AgeTypeDataEntry> ageTypesData;
+	int mId;
+	std::vector<float> mCenter;
+	float mDiameter;
+	float mAccumulatedAge = 0.0f;
+	EAgeType mAgeType;
+	std::vector<AgeTypeDataEntry> mAgeTypesData;
+	bool bProducedChild = false;
 
 public:
+	Plant(const int id, const std::vector<float>& center, const float diameter, const EAgeType ageType);
+	//Plant(Plant&& other);
 
-	Plant(const int id, const GLfloat x, const GLfloat y, const GLfloat z, const GLfloat radius, const EAgeType ageType, const float initialAge)
-	{
-		this->id = id;
-		this->X = x;
-		this->Y = y;
-		this->Z = z;
-		this->Radius = radius;
-		this->ageType = ageType;
-		this->AgeInit = initialAge;
-	}
+	std::vector<float> GetCenter() const;
+	float GetDiameter() const { return mDiameter; }
+	EAgeType GetAgeType() const { return this->mAgeType; }
+	bool GetProducedChild() { return bProducedChild; }
+	float GetAccumulatedAge() { return mAccumulatedAge; }
 
-	double GetX() const { return X; }
-	double GetY() const { return Y; }
-	double GetZ() const { return Z; }
-	double GetRadius() const { return Radius; }
-	EAgeType GetAgeType() const { return this->ageType; }
-	float GetAgeInit() const { return AgeInit; };
-	float GetAgeAccumulated() const { return AgeAccumulated; };
-	float GetAgeResulting() const { return AgeResulting; };
+	void SetAgeType(EAgeType ageType) { mAgeType = ageType; }
+	void SetDiameter(float diameter) { mDiameter = diameter; }
+	void SetProducedChild(bool inProducedChild) { bProducedChild = inProducedChild; }
+	void SetAccumulatedAge(float age) { mAccumulatedAge = age; }
 
-	void SetAgeType(EAgeType ageType) { this->ageType = ageType; }
-	void SetAgeInit(float initialAge) { this->AgeInit = initialAge; }
-	void SetAgeAccumulated(float accumulatedAge) { this->AgeAccumulated = accumulatedAge; }
-	void SetAgeResulting(float resultingAge) { this->AgeResulting = resultingAge; }
-	void SetRadius(double radius) { this->Radius = radius; }
-
-	void Print() const
-	{
-		std::cout << "Age Init = " << this->AgeInit << std::endl;
-		std::cout << "Age Accumulated = " << this->AgeAccumulated << std::endl;
-		//std::cout << "Age Type = " << this->ageType << std::endl;
-		std::cout << "X = " << this->X << std::endl;
-		std::cout << "Y = " << this->Y << std::endl;
-		std::cout << "Z = " << this->Z << std::endl;
-		std::cout << "Radius = " << this->Radius << std::endl;
-	}
+	void Print() const;
 };
