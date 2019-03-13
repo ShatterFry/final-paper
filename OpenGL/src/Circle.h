@@ -22,6 +22,7 @@ private:
 	void CalculatePoints();
 	std::shared_ptr<FloatVector> Decompose();
 	void FillIndices();
+
 public:
 	Circle();
 	Circle(const float radius, Point2f center, const int numberOfSides);

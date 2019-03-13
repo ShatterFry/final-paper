@@ -2,12 +2,14 @@
 
 #include <string>
 #include <AgeType.h>
+#include <vector>
+
+//using AgeTypeData = std::vector<struct AgeTypeDataEntry>;
 
 struct AgeTypeDataEntry {
-
 public:
 	//std::string name;
-	EAgeType Type;
-	int minAge;
-	int maxAge;
+	EAgeType mType;
+	int mMinAge;
+	int mMaxAge;
 };

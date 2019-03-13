@@ -1,9 +1,11 @@
 #pragma once
 #include <EcoScaleType.h>
 
+using EcoScaleData = std::vector<struct EcoScaleDataEntry>;
+
 struct EcoScaleDataEntry
 {
-	EEcoScaleType Type;
-	int Min;
-	int Max;
+	EEcoScaleType mType;
+	int mMin;
+	int mMax;
 };

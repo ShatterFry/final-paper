@@ -145,6 +145,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AgeTypeData.cpp" />
+    <ClCompile Include="src\AppInstance.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\AppManager.cpp" />
     <ClCompile Include="src\Circle.cpp" />
@@ -168,13 +170,16 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\AgeType.h" />
+    <ClInclude Include="src\AgeTypeData.h" />
     <ClInclude Include="src\AgeTypeDataEntry.h" />
     <ClInclude Include="src\Aliases.h" />
+    <ClInclude Include="src\AppInstance.h" />
     <ClInclude Include="src\AppManager.h" />
     <ClInclude Include="src\Circle.h" />
     <ClInclude Include="src\EcoScaleDataEntry.h" />
     <ClInclude Include="src\EcoScaleType.h" />
     <ClInclude Include="src\Errors.h" />
+    <ClInclude Include="src\GlobalAppEnums.h" />
     <ClInclude Include="src\Grid.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Line.h" />

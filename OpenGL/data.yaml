@@ -1,0 +1,11 @@
+---
+plant-name: Tru la la
+age-type-data:
+ age-type-data-entry:
+    age-type-id: 1
+    min-age: 1
+    max-age: 2
+   age-type-data-entry:
+      age-type-id: 2
+      min-age: 3
+      max-age: 4
