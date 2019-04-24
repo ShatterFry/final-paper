@@ -33,6 +33,8 @@
 #include <AgeTypeData.h>
 #include "AppInstance.h"
 
+#include "sqlite/sqlite3.h"
+
 #define SCREEN_WIDTH 960
 #define SCREEN_HEIGHT 540
 
@@ -72,6 +74,46 @@ int main(void)
 	int currentListBoxItem = 0;
 
 	bool show_another_window = true;
+
+	sqlite3* dataBase;
+	char* sqlErrorMsg;
+
+	if (sqlite3_open("myDataBase.dblite", &dataBase))
+	{
+		std::cout << "Can't create/open database: " << sqlite3_errmsg(dataBase) << std::endl;
+		sqlite3_close(dataBase);
+		return 0;
+	}
+
+	std::string testSqlStatement;
+
+	testSqlStatement = std::string("CREATE TABLE IF NOT EXISTS plants(plantName varchar(50));") +
+		std::string("INSERT INTO plants(plantName) VALUES('Test Plant');") +
+		std::string("SELECT rowid, plantName from plants;");
+
+	/*testSqlStatement = std::string("CREATE TABLE IF NOT EXISTS testTable(a, b, c);") +
+		std::string("INSERT INTO testTable VALUES(1,2,3);") +
+		std::string("SELECT * FROM testTable;");*/
+
+	//testSqlStatement = "DROP TABLE IF EXISTS testTable";
+
+	auto printTestTable = [](void *NotUsed, int argc, char **argv, char **azColName)
+	{
+		for (int i = 0; i < argc; ++i)
+		{
+			std::cout << azColName[i] << " = " << (argv[i] ? argv[i] : "NULL") << std::endl;
+		}
+
+		return 0;
+	};
+
+	if (sqlite3_exec(dataBase, testSqlStatement.c_str(), printTestTable, 0, &sqlErrorMsg) != SQLITE_OK)
+	{
+		std::cout << "SQL error: " << sqlErrorMsg << std::endl;
+		sqlite3_free(sqlErrorMsg);
+	}
+
+	sqlite3_close(dataBase);
 
 	GLFWwindow *window;
 
@@ -292,9 +334,14 @@ int main(void)
 			if (show_another_window)
 			{
 				ImGui::Begin("Another Window", &show_another_window);
+
 				ImGui::Text("Hello from another window!");
+
 				if (ImGui::Button("Close Me"))
+				{
 					show_another_window = false;
+				}
+
 				ImGui::End();
 			}
 
