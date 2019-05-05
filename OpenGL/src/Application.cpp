@@ -35,6 +35,8 @@
 
 #include "sqlite/sqlite3.h"
 
+#include "CommonDataTypes.h"
+
 #define SCREEN_WIDTH 960
 #define SCREEN_HEIGHT 540
 
@@ -43,7 +45,12 @@ void ScaleToReal(std::vector<Plant>& inPlants, const float scale);
 
 int main(void)
 {
+	AppManager* appMgr = GetAppInstance()->GetAppManager();
+	appMgr->SetDataSource(EDataSource::YAML);
+	appMgr->SyncExternalData();
+
 	enum class EModellingState { Active, Inactive, Paused };
+
 	EModellingState modellingState = EModellingState::Inactive;
 
 	std::vector<Plant> plants;
@@ -85,11 +92,22 @@ int main(void)
 		return 0;
 	}
 
-	std::string testSqlStatement;
+	std::string tableName("plants");
+	std::string dropTable("DROP TABLE IF EXISTS " + tableName);
 
-	testSqlStatement = std::string("CREATE TABLE IF NOT EXISTS plants(plantName varchar(50));") +
-		std::string("INSERT INTO plants(plantName) VALUES('Test Plant');") +
-		std::string("SELECT rowid, plantName from plants;");
+	std::string columnName("plantName");
+	std::string columnType("varchar(50)");
+	std::string createTable("CREATE TABLE IF NOT EXISTS " + tableName + "(" + columnName + " " +
+		columnType + ");");
+
+	std::string insertData = std::string("INSERT INTO " + tableName + "(" + columnName +
+			") VALUES('Halocnemum strobilaceum (Pall.) M.Bieb.');") +
+		std::string("INSERT INTO " + tableName + "(" + columnName +
+			") VALUES('Suaeda maritima (L.) Dumort.');") +
+		std::string("INSERT INTO " + tableName + "(" + columnName +
+			") VALUES('Eremopyrum orientale (L.) Jaub. & Spach');");
+
+	std::string selectData("SELECT rowid, " + columnName + " from " + tableName + ";");
 
 	/*testSqlStatement = std::string("CREATE TABLE IF NOT EXISTS testTable(a, b, c);") +
 		std::string("INSERT INTO testTable VALUES(1,2,3);") +
@@ -97,7 +115,7 @@ int main(void)
 
 	//testSqlStatement = "DROP TABLE IF EXISTS testTable";
 
-	auto printTestTable = [](void *NotUsed, int argc, char **argv, char **azColName)
+	auto printTableData = [](void *NotUsed, int argc, char **argv, char **azColName)
 	{
 		for (int i = 0; i < argc; ++i)
 		{
@@ -107,13 +125,48 @@ int main(void)
 		return 0;
 	};
 
-	if (sqlite3_exec(dataBase, testSqlStatement.c_str(), printTestTable, 0, &sqlErrorMsg) != SQLITE_OK)
+	auto executeSQL = [](sqlite3* db, const char* statement, int(*callback)(void*, int, char**, char**), void* firstArg, char** errMsg)
 	{
-		std::cout << "SQL error: " << sqlErrorMsg << std::endl;
-		sqlite3_free(sqlErrorMsg);
-	}
+		if (sqlite3_exec(db, statement, callback, firstArg, errMsg) != SQLITE_OK)
+		{
+			std::cout << "SQL error: " << *errMsg << std::endl;
+			sqlite3_free(*errMsg);
+		}
+	};
 
-	sqlite3_close(dataBase);
+	executeSQL(dataBase, dropTable.c_str(), nullptr, nullptr, &sqlErrorMsg);
+	executeSQL(dataBase, createTable.c_str(), nullptr, nullptr, &sqlErrorMsg);
+	executeSQL(dataBase, insertData.c_str(), nullptr, nullptr, &sqlErrorMsg);
+
+	std::vector<std::string> plantNames;
+
+	auto getPlantNames = [](void* data, int num, char **colValue, char **colName)
+	{
+		//std::cout << "Data pointer = " << data << std::endl;
+
+		UCallbackGetVectorData<std::string>* Data = static_cast<UCallbackGetVectorData<std::string>*>(data);
+
+		for (int i = 0; i < num; ++i)
+		{
+			if (colName[i] == Data->ColumnName)
+			{
+				Data->VectorToFill->emplace_back(colValue[i]);
+			}
+		}
+
+		return 0;
+	};
+
+	executeSQL(dataBase, selectData.c_str(), printTableData, nullptr, &sqlErrorMsg);
+
+	//UCallbackGetVectorData<std::string>* callbackData = new UCallbackGetVectorData<std::string>();
+	UCallbackGetVectorData<std::string> callbackData;
+	callbackData.ColumnName = columnName;
+	callbackData.VectorToFill = &plantNames;
+
+	//std::cout << &callbackData << std::endl;
+	executeSQL(dataBase, selectData.c_str(), getPlantNames, &callbackData, &sqlErrorMsg);
+	//delete(callbackData);
 
 	GLFWwindow *window;
 
@@ -258,9 +311,15 @@ int main(void)
 				//ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
 				//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 				
-				ImGui::Text("1) Halocnemum strobilaceum (Pall.) M.Bieb.");
+				/*ImGui::Text("1) Halocnemum strobilaceum (Pall.) M.Bieb.");
 				ImGui::Text("2) Suaeda maritima (L.) Dumort.");
-				ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");
+				ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");*/
+
+				for (const std::string& name : plantNames)
+				{
+					ImGui::Text(name.c_str());
+				}
+
 				ImGui::Separator();
 				ImGui::Text("Implemented niche = %.1f", actualEcoPct);
 
@@ -533,6 +592,8 @@ int main(void)
 	ImGui_ImplGlfw_Shutdown();
 	ImGui::DestroyContext();
 	glfwTerminate();
+
+	sqlite3_close(dataBase);
 
 	return 0;
 }

@@ -84,6 +84,25 @@ void TrimCharacters(std::string& source, const std::string& charsToTrim)
 
 AppManager::AppManager()
 {
+
+}
+
+void AppManager::SyncExternalData()
+{
+	switch (mDataSource)
+	{
+	case EDataSource::SQLITE:
+		break;
+	case EDataSource::YAML:
+		SyncExternalDataFromYAML();
+		break;
+	default:
+		break;
+	}
+}
+
+void AppManager::SyncExternalDataFromYAML()
+{
 	std::ifstream inStream("data.yaml");
 
 	auto trimCharacters = [&](std::string& source)

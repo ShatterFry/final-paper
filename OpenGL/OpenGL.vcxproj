@@ -178,6 +178,7 @@
     <ClInclude Include="src\AppInstance.h" />
     <ClInclude Include="src\AppManager.h" />
     <ClInclude Include="src\Circle.h" />
+    <ClInclude Include="src\CommonDataTypes.h" />
     <ClInclude Include="src\EcoScaleDataEntry.h" />
     <ClInclude Include="src\EcoScaleType.h" />
     <ClInclude Include="src\Errors.h" />
