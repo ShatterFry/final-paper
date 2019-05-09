@@ -1,5 +1,6 @@
-#include <GL/glew.h>
-#include <GLFW/glfw3.h>
+#include <windows.h>
+#include "../../dependencies/glew/include/GL/glew.h"
+#include "../../dependencies/glfw/include/GLFW/glfw3.h"
 
 #define _USE_MATH_DEFINES
 #include <math.h>
@@ -9,31 +10,33 @@
 #include <cfenv>
 #include <algorithm>
 
-#include <Renderer.h>
-#include <VertexBufferLayout.h>
-#include <Texture.h>
+#include "Renderer.h"
+#include "VertexBufferLayout.h"
+#include "Texture.h"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
+#include "vendor/glm/glm.hpp"
+#include "vendor/glm/gtc/matrix_transform.hpp"
 
-#include "imgui/imgui.h"
-#include "imgui/imgui_impl_glfw.h"
-#include "imgui/imgui_impl_opengl3.h"
+#include "vendor/imgui/imgui.h"
+#include "vendor/imgui/imgui_impl_glfw.h"
+#include "vendor/imgui/imgui_impl_opengl3.h"
 
-#include <AgeTypeDataEntry.h>
-#include <Plant.h>
+#include "AgeTypeDataEntry.h"
+#include "Plant.h"
 
-#include <Point.h>
-#include <Circle.h>
-#include <Rectangle.h>
-#include <Aliases.h>
-#include <Grid.h>
-#include <AppManager.h>
+#include "Point.h"
+#include "Circle.h"
+#include "Rectangle.h"
+#include "Aliases.h"
+#include "Grid.h"
+#include "AppManager.h"
+
 #include <random>
-#include <AgeTypeData.h>
+
+#include "AgeTypeData.h"
 #include "AppInstance.h"
 
-#include "sqlite/sqlite3.h"
+#include "vendor/sqlite/sqlite3.h"
 
 #include "CommonDataTypes.h"
 
@@ -55,7 +58,7 @@ int main(void)
 
 	std::vector<Plant> plants;
 	std::shared_ptr<AgeRadiusVector> averageRadiuses = std::make_shared<AgeRadiusVector>(static_cast<int>(EAgeType::MAX) - 1, 0.0f);
-	
+
 	bool bProduceChildren = false;
 
 	int halocnemumId = 0;
@@ -187,7 +190,7 @@ int main(void)
 		glfwTerminate();
 		return -1;
 	}
-	
+
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
@@ -310,7 +313,7 @@ int main(void)
 				//ImGui::SliderFloat3("Translation A", &translationA.x, 0.0f, 960.0f);
 				//ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
 				//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
-				
+
 				/*ImGui::Text("1) Halocnemum strobilaceum (Pall.) M.Bieb.");
 				ImGui::Text("2) Suaeda maritima (L.) Dumort.");
 				ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");*/
@@ -459,7 +462,7 @@ int main(void)
 
 					int minAgeTypeDuration = plantAgeData.at(static_cast<int>(it->GetAgeType()) - 1).mMinAge;
 					int maxAgeTypeDuration = plantAgeData.at(static_cast<int>(it->GetAgeType()) - 1).mMaxAge;
-					
+
 					int resultingAgeDuration = minAgeTypeDuration + (maxAgeTypeDuration - minAgeTypeDuration) * actualEcoPct;
 
 					float ageIncrease = passedYears - it->GetAccumulatedAge();
@@ -472,7 +475,7 @@ int main(void)
 
 						EAgeType prevAgeType = it->GetAgeType();
 						EAgeType newAgeType = static_cast<EAgeType>(static_cast<int>(prevAgeType) + 1);
-						
+
 						if (it->GetDieOnNextAge())
 						{
 							plantsToDeleteIdx.push_back(index);

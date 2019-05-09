@@ -1,5 +1,6 @@
 #pragma once
-#include <EcoScaleType.h>
+
+#include "EcoScaleType.h"
 
 using EcoScaleData = std::vector<struct EcoScaleDataEntry>;
 

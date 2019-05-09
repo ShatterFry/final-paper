@@ -2,9 +2,10 @@
 
 #include <memory>
 #include <vector>
-#include <AgeTypeDataEntry.h>
-#include <EcoScaleDataEntry.h>
-#include <AgeTypeData.h>
+
+#include "AgeTypeDataEntry.h"
+#include "EcoScaleDataEntry.h"
+#include "AgeTypeData.h"
 
 enum class EDataSource { YAML, SQLITE, MAX };
 

@@ -1,5 +1,5 @@
 #pragma once
-#include <Point.h>
+#include "Point.h"
 
 using LinesVector = std::vector<class Line>;
 
