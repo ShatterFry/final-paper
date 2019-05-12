@@ -1,14 +1,22 @@
-#include <Circle.h>
+#ifndef _USE_MATH_DEFINES
+    #define _USE_MATH_DEFINES
+#endif
 
-#define _USE_MATH_DEFINES
-#include <math.h>
+#ifdef __STRICT_ANSI__
+    #undef __STRICT_ANSI__
+#endif
+
+#include <cmath>
+
+#include "Circle.h"
+
 #include <iostream>
 
-#include <VertexArray.h>
-#include <IndexBuffer.h>
-#include <Shader.h>
+#include "VertexArray.h"
+#include "IndexBuffer.h"
+#include "Shader.h"
 
-#include <Renderer.h>
+#include "Renderer.h"
 
 void Circle::CalculatePoints()
 {

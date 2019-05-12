@@ -1,5 +1,1 @@
-﻿  Application.cpp
-d:\dev\cpp\final-paper\winapi\src\application.cpp(208): warning C4302: 'type cast': truncation from 'LPWSTR' to 'WORD'
-d:\dev\cpp\final-paper\winapi\src\application.cpp(210): warning C4302: 'type cast': truncation from 'LPWSTR' to 'WORD'
-d:\dev\cpp\final-paper\winapi\src\application.cpp(300): warning C4267: 'argument': conversion from 'size_t' to 'int', possible loss of data
-  WinAPI.vcxproj -> D:\dev\cpp\final-paper\x64\Debug\WinAPI.exe
+﻿

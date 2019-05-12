@@ -1,11 +1,11 @@
-#include <Shader.h>
+#include "Shader.h"
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <sstream>
 
-#include <Renderer.h>
+#include "Renderer.h"
 
 Shader::Shader(const std::string& filepath)
 	: m_FilePath(filepath), m_RendererID(0)
@@ -16,7 +16,11 @@ Shader::Shader(const std::string& filepath)
 
 Shader::~Shader()
 {
-	GLCall(glDeleteProgram(m_RendererID));
+    FFunctionCallback funcCB = [&]()
+    {
+        glDeleteProgram(m_RendererID);
+    };
+	GLCall(funcCB);
 }
 
 ShaderProgramSource Shader::ParseShader(const std::string& filepath)
@@ -55,23 +59,80 @@ unsigned int Shader::CompileShader(
 	const std::string& source
 )
 {
-	GLCall(unsigned int id = glCreateShader(type));
+    unsigned int id = 0;
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            id = glCreateShader(type);
+        };
+        GLCall(funcCB);
+    }
+
 	const char* src = source.c_str();
-	GLCall(glShaderSource(id, 1, &src, nullptr));
-	GLCall(glCompileShader(id));
-	int result;
-	GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
+
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glShaderSource(id, 1, &src, nullptr);
+        };
+        GLCall(funcCB);
+    }
+
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glCompileShader(id);
+        };
+        GLCall(funcCB);
+    }
+
+	int result = 0;
+
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+        };
+        GLCall(funcCB);
+    }
 
 	if (result == GL_FALSE) {
-		int length;
-		GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
-		char* message = (char*)alloca(length * sizeof(char));
-		GLCall(glGetShaderInfoLog(id, length, &length, message));
+		int length = 0;
+
+        {
+            FFunctionCallback funcCB = [&]()
+            {
+                glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+            };
+            GLCall(funcCB);
+        }
+
+		//char* message = (char*)alloca(length * sizeof(char));
+        char* message = new char[length * sizeof(char)];
+
+        {
+            FFunctionCallback funcCB = [&]()
+            {
+                glGetShaderInfoLog(id, length, &length, message);
+            };
+            GLCall(funcCB);
+        }
+
 		std::cout << "Failed to compile "
 			<< (type == GL_VERTEX_SHADER ? "vertex" : "fragment")
 			<< " shader!" << std::endl;
+
 		std::cout << message << std::endl;
-		GLCall(glDeleteShader(id));
+
+        {
+            FFunctionCallback funcCB = [&]()
+            {
+                glDeleteShader(id);
+            };
+            GLCall(funcCB);
+        }
+
+        delete[] message;
 		return 0;
 	}
 
@@ -83,41 +144,103 @@ unsigned int Shader::CreateShader(
 	const std::string& fragmentShader
 )
 {
-	GLCall(unsigned int program = glCreateProgram());
+    unsigned int program = 0;
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            program = glCreateProgram();
+        };
+        GLCall(funcCB);
+    }
 
 	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
 	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
 
-	GLCall(glAttachShader(program, vs));
-	GLCall(glAttachShader(program, fs));
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glAttachShader(program, vs);
+        };
+        GLCall(funcCB);
+    }
 
-	GLCall(glLinkProgram(program));
-	GLCall(glValidateProgram(program));
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glAttachShader(program, fs);
+        };
+        GLCall(funcCB);
+    }
 
-	GLCall(glDeleteShader(vs));
-	GLCall(glDeleteShader(fs));
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glLinkProgram(program);
+        };
+        GLCall(funcCB);
+    }
+
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glValidateProgram(program);
+        };
+        GLCall(funcCB);
+    }
+
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glDeleteShader(vs);
+        };
+        GLCall(funcCB);
+    }
+
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            glDeleteShader(fs);
+        };
+        GLCall(funcCB);
+    }
 
 	return program;
 }
 
 void Shader::Bind() const
 {
-	GLCall(glUseProgram(m_RendererID));
+    FFunctionCallback funcCB = [&]()
+    {
+        glUseProgram(m_RendererID);
+    };
+	GLCall(funcCB);
 }
 
 void Shader::Unbind() const
 {
-	GLCall(glUseProgram(0));
+    FFunctionCallback funcCB = []()
+    {
+        glUseProgram(0);
+    };
+	GLCall(funcCB);
 }
 
 void Shader::SetUniform1i(const std::string& name, int value)
 {
-	GLCall(glUniform1i(GetUniformLocation(name), value));
+    FFunctionCallback funcCB = [&]()
+    {
+        glUniform1i(GetUniformLocation(name), value);
+    };
+	GLCall(funcCB);
 }
 
 void Shader::SetUniform1f(const std::string& name, float value)
 {
-	GLCall(glUniform1f(GetUniformLocation(name), value));
+    FFunctionCallback funcCB = [&]()
+    {
+        glUniform1f(GetUniformLocation(name), value);
+    };
+	GLCall(funcCB);
 }
 
 void Shader::SetUniform4f(
@@ -128,7 +251,11 @@ void Shader::SetUniform4f(
 	float v3
 )
 {
-	GLCall(glUniform4f( GetUniformLocation(name), v0, v1, v2, v3 ));
+    FFunctionCallback funcCB = [&]()
+    {
+        glUniform4f( GetUniformLocation(name), v0, v1, v2, v3 );
+    };
+	GLCall(funcCB);
 }
 
 void Shader::SetUniformMat4f(
@@ -136,8 +263,12 @@ void Shader::SetUniformMat4f(
 	const glm::mat4& matrix
 )
 {
-	GLCall(glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE,
-		&matrix[0][0]));
+    FFunctionCallback funcCB = [&]()
+    {
+        glUniformMatrix4fv(GetUniformLocation(name), 1, GL_FALSE,
+		&matrix[0][0]);
+    };
+	GLCall(funcCB);
 }
 
 int Shader::GetUniformLocation(const std::string& name)
@@ -147,17 +278,22 @@ int Shader::GetUniformLocation(const std::string& name)
 		return m_UniformLocationCache[name];
 	}
 
-	GLCall(
-		int location = glGetUniformLocation( m_RendererID, name.c_str() );
-	);
+    int location = 0;
+    {
+        FFunctionCallback funcCB = [&]()
+        {
+            location = glGetUniformLocation( m_RendererID, name.c_str() );
+        };
+        GLCall(funcCB);
+    }
 
 	if (location == -1)
 	{
 		std::cout << "Warning: uniform " << name << " doesn't exist!" <<
 			std::endl;
 	}
-	
+
 	m_UniformLocationCache[name] = location;
-	
+
 	return location;
 }

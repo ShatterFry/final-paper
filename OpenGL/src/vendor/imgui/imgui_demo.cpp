@@ -24,7 +24,8 @@
 
 #include "imgui.h"
 #include <ctype.h>          // toupper, isprint
-#include <limits.h>         // INT_MIN, INT_MAX
+//#include <limits.h>         // INT_MIN, INT_MAX
+#include <climits>
 #include <math.h>           // sqrtf, powf, cosf, sinf, floorf, ceilf
 #include <stdio.h>          // vsnprintf, sscanf, printf
 #include <stdlib.h>         // NULL, malloc, free, atoi

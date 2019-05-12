@@ -1,14 +1,22 @@
-#include <windows.h>
+#ifndef _USE_MATH_DEFINES
+    #define _USE_MATH_DEFINES
+#endif
+
+#ifdef __STRICT_ANSI__
+    #undef __STRICT_ANSI__
+#endif
+
+#include <cmath>
+
 #include "../../dependencies/glew/include/GL/glew.h"
 #include "../../dependencies/glfw/include/GLFW/glfw3.h"
 
-#define _USE_MATH_DEFINES
-#include <math.h>
 #include <iostream>
 #include <vector>
 #include <map>
 #include <cfenv>
 #include <algorithm>
+#include <random>
 
 #include "Renderer.h"
 #include "VertexBufferLayout.h"
@@ -30,8 +38,6 @@
 #include "Aliases.h"
 #include "Grid.h"
 #include "AppManager.h"
-
-#include <random>
 
 #include "AgeTypeData.h"
 #include "AppInstance.h"
@@ -215,8 +221,21 @@ int main(void)
 			2, 3, 0
 		};
 
-		GLCall(glEnable(GL_BLEND));
-		GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+        {
+            FFunctionCallback funcCB = []()
+            {
+                glEnable(GL_BLEND);
+            };
+            GLCall(funcCB);
+        }
+
+        {
+            FFunctionCallback funcCB = []()
+            {
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            };
+            GLCall(funcCB);
+        }
 
 		VertexArray va;
 		VertexBuffer<float> vb(positions);
@@ -280,7 +299,7 @@ int main(void)
 				shader->Bind();
 				shader->SetUniformMat4f("u_MVP", mvp);
 				shader->SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-				EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
+				//EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 
 				//renderer.Draw(va, ib, shader, drawType);
 			}
@@ -291,12 +310,12 @@ int main(void)
 				shader->Bind();
 				shader->SetUniformMat4f("u_MVP", mvp);
 				shader->SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-				EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
+				//EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 
 				//renderer.Draw(va, ib, shader, drawType);
 			}
 
-			Rectangle boundingRectangle = Rectangle(Point2f(0.0f, 0.0f), Point2f(0.0f, 250.0f), Point2f(250.0f, 250.0f), Point2f(250.0f, 0.0f));
+			URectangle boundingRectangle = URectangle(Point2f(0.0f, 0.0f), Point2f(0.0f, 250.0f), Point2f(250.0f, 250.0f), Point2f(250.0f, 0.0f));
 			std::shared_ptr<Grid> grid = std::make_shared<Grid>(boundingRectangle, 5, 5);
 			grid->Draw(proj, view, gridTranslation, shader, renderer);
 
@@ -445,12 +464,12 @@ int main(void)
 
 						Plant childPlant(halocnemumId, { childX, childY, childZ }, seRadius, EAgeType::se);
 
-						Rectangle boundingRectangle = grid->GetBoundingRectangle();
+						URectangle boundingRectangle = grid->GetBoundingRectangle();
 
-						float maxPositionX = childX + seRadius;
+						/*float maxPositionX = childX + seRadius;
 						float minPositionX = childX - seRadius;
 						float maxPositionY = childY + seRadius;
-						float minPositionY = childY - seRadius;
+						float minPositionY = childY - seRadius;*/
 
 						plantsToAdd.push_back(childPlant);
 						it->SetProducedChild(true);
@@ -568,7 +587,7 @@ int main(void)
 			{
 				for (std::vector<Plant>::iterator i = plants.begin(); i != plants.end(); ++i)
 				{
-					Rectangle gridSquare = grid->GetBoundingRectangle();
+					URectangle gridSquare = grid->GetBoundingRectangle();
 
 					float gridXLeft = gridSquare.GetBottomLeftPoint()._x;
 					float gridXRight = gridSquare.GetBottomRightPoint()._x;

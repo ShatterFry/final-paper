@@ -1,10 +1,14 @@
-#include <Renderer.h>
+#include "Renderer.h"
 #include <iostream>
-#include <Errors.h>
+#include "Errors.h"
 
 void Renderer::Clear() const
 {
-	GLCall(glClear(GL_COLOR_BUFFER_BIT));
+    FFunctionCallback funcToCall = []()
+    {
+        glClear(GL_COLOR_BUFFER_BIT);
+    };
+	GLCall(funcToCall);
 }
 
 void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, std::shared_ptr<Shader>& shader, EDrawTypes drawType) const
@@ -15,12 +19,24 @@ void Renderer::Draw(const VertexArray& va, const IndexBuffer& ib, std::shared_pt
 
 	switch (drawType)
 	{
-	case EDrawTypes::EDT_TRIANGLES:
-		GLCall(glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
-		break;
-	case EDrawTypes::EDT_LINES:
-		GLCall(glDrawElements(GL_LINES, ib.GetCount(), GL_UNSIGNED_INT, nullptr));
-		break;
+        case EDrawTypes::EDT_TRIANGLES:
+        {
+            FFunctionCallback funcCB = [&]()
+            {
+                glDrawElements(GL_TRIANGLES, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+            };
+            GLCall(funcCB);
+            break;
+        }
+        case EDrawTypes::EDT_LINES:
+        {
+            FFunctionCallback funcCB = [&]()
+            {
+                glDrawElements(GL_LINES, ib.GetCount(), GL_UNSIGNED_INT, nullptr);
+            };
+            GLCall(funcCB);
+            break;
+        }
 	}
-	
+
 }

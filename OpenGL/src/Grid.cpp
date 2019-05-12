@@ -1,17 +1,15 @@
-#include <Grid.h>
-
-#include <VertexArray.h>
-#include <IndexBuffer.h>
-#include <Shader.h>
-
-#include <Renderer.h>
+#include "Grid.h"
+#include "VertexArray.h"
+#include "IndexBuffer.h"
+#include "Shader.h"
+#include "Renderer.h"
 
 Grid::Grid()
 {
-	
+
 }
 
-Grid::Grid(Rectangle rectangle, int rows, int columns)
+Grid::Grid(URectangle rectangle, int rows, int columns)
 {
 	_boundingRectangle = rectangle;
 
@@ -45,12 +43,12 @@ Grid::Grid(Rectangle rectangle, int rows, int columns)
 	}
 }
 
-void Grid::SetBoundingRectangle(Rectangle boundingRectangle)
+void Grid::SetBoundingRectangle(URectangle boundingRectangle)
 {
 	_boundingRectangle = boundingRectangle;
 }
 
-Rectangle Grid::GetBoundingRectangle() const
+URectangle Grid::GetBoundingRectangle() const
 {
 	return _boundingRectangle;
 }

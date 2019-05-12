@@ -1,13 +1,14 @@
 #pragma once
+
 #include "Line.h"
 
-using RectangleVector = std::vector<class Rectangle>;
+using RectangleVector = std::vector<class URectangle>;
 
-class Rectangle
+class URectangle
 {
 public:
-	Rectangle();
-	Rectangle(const Point2f bottomLeft, const Point2f topLeft, const Point2f topRight, const Point2f bottomRight);
+	URectangle();
+	URectangle(const Point2f bottomLeft, const Point2f topLeft, const Point2f topRight, const Point2f bottomRight);
 
 	void SetTopLeftPoint(const Point2f point);
 	Point2f GetTopLeftPoint() const;

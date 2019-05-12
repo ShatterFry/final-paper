@@ -87,6 +87,9 @@
     <ClCompile Include="src\vendor\sqlite\sqlite3.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\VertexBufferLayout.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Plant.h">
@@ -197,5 +200,8 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Basic.shader" />
+    <None Include="data.yaml" />
+    <None Include="imgui.ini" />
+    <None Include="myDataBase.dblite" />
   </ItemGroup>
 </Project>

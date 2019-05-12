@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6" />
+	<Project>
+		<Option title="OpenGL" />
+		<Option pch_mode="2" />
+		<Option compiler="mingw64" />
+		<Build>
+			<Target title="Debug">
+				<Option output="bin/Debug/OpenGL" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Debug/" />
+				<Option type="1" />
+				<Option compiler="mingw64" />
+				<Compiler>
+					<Add option="-g" />
+				</Compiler>
+			</Target>
+			<Target title="Release">
+				<Option output="bin/Release/OpenGL" prefix_auto="1" extension_auto="1" />
+				<Option object_output="obj/Release/" />
+				<Option type="1" />
+				<Option compiler="mingw64" />
+				<Compiler>
+					<Add option="-O2" />
+				</Compiler>
+				<Linker>
+					<Add option="-s" />
+				</Linker>
+			</Target>
+		</Build>
+		<Compiler>
+			<Add option="-Wall" />
+			<Add option="-std=c++14" />
+			<Add option="-DGLEW_STATIC" />
+			<Add directory="src/vendor" />
+			<Add directory="src" />
+			<Add directory="../dependencies/glfw/include" />
+			<Add directory="../dependencies/glew/include" />
+		</Compiler>
+		<Linker>
+			<Add library="../dependencies/glfw/lib-mingw-w64/libglfw3.a" />
+			<Add library="../dependencies/glew/lib/Release/x64/glew32s.lib" />
+			<Add library="../../../Windows Kits/10/Lib/10.0.17134.0/um/x64/OpenGL32.Lib" />
+			<Add library="../../../Windows Kits/10/Lib/10.0.17134.0/um/x64/Gdi32.Lib" />
+			<Add directory="../dependencies/glfw/lib-vc2015" />
+			<Add directory="../dependencies/glew/lib/Release/x64" />
+		</Linker>
+		<Unit filename="data.yaml" />
+		<Unit filename="imgui.ini" />
+		<Unit filename="myDataBase.dblite" />
+		<Unit filename="src/AgeType.h" />
+		<Unit filename="src/AgeTypeData.cpp" />
+		<Unit filename="src/AgeTypeData.h" />
+		<Unit filename="src/AgeTypeDataEntry.h" />
+		<Unit filename="src/Aliases.h" />
+		<Unit filename="src/AppInstance.cpp" />
+		<Unit filename="src/AppInstance.h" />
+		<Unit filename="src/AppManager.cpp" />
+		<Unit filename="src/AppManager.h" />
+		<Unit filename="src/Application.cpp" />
+		<Unit filename="src/Circle.cpp" />
+		<Unit filename="src/Circle.h" />
+		<Unit filename="src/CommonDataTypes.h" />
+		<Unit filename="src/EcoScaleDataEntry.h" />
+		<Unit filename="src/EcoScaleType.h" />
+		<Unit filename="src/Errors.cpp" />
+		<Unit filename="src/Errors.h" />
+		<Unit filename="src/GlobalAppEnums.h" />
+		<Unit filename="src/Grid.cpp" />
+		<Unit filename="src/Grid.h" />
+		<Unit filename="src/IndexBuffer.cpp" />
+		<Unit filename="src/IndexBuffer.h" />
+		<Unit filename="src/Line.cpp" />
+		<Unit filename="src/Line.h" />
+		<Unit filename="src/Plant.cpp" />
+		<Unit filename="src/Plant.h" />
+		<Unit filename="src/Point.cpp" />
+		<Unit filename="src/Point.h" />
+		<Unit filename="src/Rectangle.cpp" />
+		<Unit filename="src/Rectangle.h" />
+		<Unit filename="src/Renderer.cpp" />
+		<Unit filename="src/Renderer.h" />
+		<Unit filename="src/Shader.cpp" />
+		<Unit filename="src/Shader.h" />
+		<Unit filename="src/Texture.cpp" />
+		<Unit filename="src/Texture.h" />
+		<Unit filename="src/VertexArray.cpp" />
+		<Unit filename="src/VertexArray.h" />
+		<Unit filename="src/VertexBuffer.h" />
+		<Unit filename="src/VertexBufferLayout.cpp" />
+		<Unit filename="src/VertexBufferLayout.h" />
+		<Unit filename="src/vendor/imgui/imconfig.h" />
+		<Unit filename="src/vendor/imgui/imgui.cpp" />
+		<Unit filename="src/vendor/imgui/imgui.h" />
+		<Unit filename="src/vendor/imgui/imgui_demo.cpp" />
+		<Unit filename="src/vendor/imgui/imgui_draw.cpp" />
+		<Unit filename="src/vendor/imgui/imgui_impl_glfw.cpp" />
+		<Unit filename="src/vendor/imgui/imgui_impl_glfw.h" />
+		<Unit filename="src/vendor/imgui/imgui_impl_opengl3.cpp" />
+		<Unit filename="src/vendor/imgui/imgui_impl_opengl3.h" />
+		<Unit filename="src/vendor/imgui/imgui_internal.h" />
+		<Unit filename="src/vendor/imgui/stb_rect_pack.h" />
+		<Unit filename="src/vendor/imgui/stb_textedit.h" />
+		<Unit filename="src/vendor/imgui/stb_truetype.h" />
+		<Unit filename="src/vendor/sqlite/sqlite3.c">
+			<Option compilerVar="CC" />
+		</Unit>
+		<Unit filename="src/vendor/sqlite/sqlite3.h" />
+		<Unit filename="src/vendor/sqlite/sqlite3ext.h" />
+		<Unit filename="src/vendor/stb_image/stb_image.cpp" />
+		<Unit filename="src/vendor/stb_image/stb_image.h" />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+			<lib_finder disable_auto="1" />
+		</Extensions>
+	</Project>
+</CodeBlocks_project_file>

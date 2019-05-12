@@ -1,24 +1,39 @@
-#include <VertexArray.h>
-
-#include <VertexBufferLayout.h>
-#include <Renderer.h>
+#include "VertexArray.h"
+#include "VertexBufferLayout.h"
+#include "Renderer.h"
 
 VertexArray::VertexArray()
 {
-	GLCall(glGenVertexArrays(1, &m_RendererID));
+    FFunctionCallback funcToCall = [&]()
+    {
+        glGenVertexArrays(1, &m_RendererID);
+    };
+	GLCall(funcToCall);
 }
 
 VertexArray::~VertexArray()
 {
-	GLCall(glDeleteVertexArrays(1, &m_RendererID));
+    FFunctionCallback funcToCall = [&]()
+    {
+        glDeleteVertexArrays(1, &m_RendererID);
+    };
+    GLCall(funcToCall);
 }
 
 void VertexArray::Bind() const
 {
-	GLCall(glBindVertexArray(m_RendererID));
+    FFunctionCallback funcToCall = [&]()
+    {
+        glBindVertexArray(m_RendererID);
+    };
+	GLCall(funcToCall);
 }
 
 void VertexArray::Unbind() const
 {
-	GLCall(glBindVertexArray(0));
+    FFunctionCallback funcCB = []()
+    {
+        glBindVertexArray(0);
+    };
+	GLCall(funcCB);
 }

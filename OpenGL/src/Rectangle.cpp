@@ -1,51 +1,51 @@
-#include <Rectangle.h>
+#include "Rectangle.h"
 
-void Rectangle::SetTopLeftPoint(const Point2f point)
+void URectangle::SetTopLeftPoint(const Point2f point)
 {
 	_topLeftPoint = point;
 }
 
-Point2f Rectangle::GetTopLeftPoint() const
+Point2f URectangle::GetTopLeftPoint() const
 {
 	return _topLeftPoint;
 }
 
-void Rectangle::SetTopRightPoint(const Point2f point)
+void URectangle::SetTopRightPoint(const Point2f point)
 {
 	_topRightPoint = point;
 }
 
-Point2f Rectangle::GetTopRightPoint() const
+Point2f URectangle::GetTopRightPoint() const
 {
 	return _topRightPoint;
 }
 
-void Rectangle::SetBottomRightPoint(const Point2f point)
+void URectangle::SetBottomRightPoint(const Point2f point)
 {
 	_bottomRightPoint = point;
 }
 
-Point2f Rectangle::GetBottomRightPoint() const
+Point2f URectangle::GetBottomRightPoint() const
 {
 	return _bottomRightPoint;
 }
 
-void Rectangle::SetBottomLeftPoint(const Point2f point)
+void URectangle::SetBottomLeftPoint(const Point2f point)
 {
 	_bottomLeftPoint = point;
 }
 
-Point2f Rectangle::GetBottomLeftPoint() const
+Point2f URectangle::GetBottomLeftPoint() const
 {
 	return _bottomLeftPoint;
 }
 
-Rectangle::Rectangle()
+URectangle::URectangle()
 {
-	
+
 }
 
-Rectangle::Rectangle(const Point2f bottomLeft, const Point2f topLeft, const Point2f topRight, const Point2f bottomRight)
+URectangle::URectangle(const Point2f bottomLeft, const Point2f topLeft, const Point2f topRight, const Point2f bottomRight)
 {
 	_bottomLeftPoint = bottomLeft;
 	_topLeftPoint = topLeft;
@@ -75,7 +75,7 @@ Rectangle::Rectangle(const Point2f bottomLeft, const Point2f topLeft, const Poin
 	_lines->push_back(_bottomLine);
 }
 
-std::shared_ptr<LinesVector> Rectangle::GetLines() const
+std::shared_ptr<LinesVector> URectangle::GetLines() const
 {
 	return _lines;
 }
