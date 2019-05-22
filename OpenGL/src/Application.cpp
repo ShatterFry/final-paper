@@ -49,6 +49,8 @@
 #define SCREEN_WIDTH 960
 #define SCREEN_HEIGHT 540
 
+#include <sstream>
+
 void FillOutPlantsData(std::vector<Plant>& plants, int plantId);
 void ScaleToReal(std::vector<Plant>& inPlants, const float scale);
 
@@ -92,6 +94,7 @@ int main(void)
 	bool show_another_window = true;
 
 	sqlite3* dataBase;
+
 	char* sqlErrorMsg;
 
 	if (sqlite3_open("myDataBase.dblite", &dataBase))
@@ -101,22 +104,28 @@ int main(void)
 		return 0;
 	}
 
-	std::string tableName("plants");
-	std::string dropTable("DROP TABLE IF EXISTS " + tableName);
+	std::string plants_TableName("plants");
 
-	std::string columnName("plantName");
-	std::string columnType("varchar(50)");
-	std::string createTable("CREATE TABLE IF NOT EXISTS " + tableName + "(" + columnName + " " +
-		columnType + ");");
+	std::string dropTable("DROP TABLE IF EXISTS " + plants_TableName);
 
-	std::string insertData = std::string("INSERT INTO " + tableName + "(" + columnName +
+    std::string rowid_ColumnName_PlantsTable("rowid");
+	std::string plantName_ColumnName("plantName");
+	std::string plantName_ColumnType("varchar(50)");
+
+	std::vector<std::string> plants_ColumnNames = { rowid_ColumnName_PlantsTable, plantName_ColumnName};
+
+	std::string createTable("CREATE TABLE IF NOT EXISTS " + plants_TableName + "(" + plantName_ColumnName + " " +
+		plantName_ColumnType + ");");
+
+	std::string insertData = std::string("INSERT INTO " + plants_TableName + "(" + plantName_ColumnName +
 			") VALUES('Halocnemum strobilaceum (Pall.) M.Bieb.');") +
-		std::string("INSERT INTO " + tableName + "(" + columnName +
+		std::string("INSERT INTO " + plants_TableName + "(" + plantName_ColumnName +
 			") VALUES('Suaeda maritima (L.) Dumort.');") +
-		std::string("INSERT INTO " + tableName + "(" + columnName +
+		std::string("INSERT INTO " + plants_TableName + "(" + plantName_ColumnName +
 			") VALUES('Eremopyrum orientale (L.) Jaub. & Spach');");
 
-	std::string selectData("SELECT rowid, " + columnName + " from " + tableName + ";");
+	std::string selectData("SELECT " + rowid_ColumnName_PlantsTable + ", " + plantName_ColumnName + " FROM " +
+                        plants_TableName + ";");
 
 	/*testSqlStatement = std::string("CREATE TABLE IF NOT EXISTS testTable(a, b, c);") +
 		std::string("INSERT INTO testTable VALUES(1,2,3);") +
@@ -124,12 +133,16 @@ int main(void)
 
 	//testSqlStatement = "DROP TABLE IF EXISTS testTable";
 
-	auto printTableData = [](void *NotUsed, int argc, char **argv, char **azColName)
+	auto printTableData = [](void* firstArg, int colNum, char** colValues, char** colNames)
 	{
-		for (int i = 0; i < argc; ++i)
+	    std::cout << "printTableData" << std::endl;
+        std::cout << "colNum = " << colNum << std::endl;
+
+		for (int i = 0; i < colNum; ++i)
 		{
-			std::cout << azColName[i] << " = " << (argv[i] ? argv[i] : "NULL") << std::endl;
+			std::cout << colNames[i] << " = " << (colValues[i] ? colValues[i] : "NULL") << std::endl;
 		}
+        std::cout << "\n";
 
 		return 0;
 	};
@@ -147,35 +160,53 @@ int main(void)
 	executeSQL(dataBase, createTable.c_str(), nullptr, nullptr, &sqlErrorMsg);
 	executeSQL(dataBase, insertData.c_str(), nullptr, nullptr, &sqlErrorMsg);
 
-	std::vector<std::string> plantNames;
+    std::vector<FPlantSpecieData> speciesData;
 
-	auto getPlantNames = [](void* data, int num, char **colValue, char **colName)
+	auto getSpeciesData = [](void* firstArg, int num, char** colValue, char** colName)
 	{
-		//std::cout << "Data pointer = " << data << std::endl;
+		/*UCallbackGetVectorData<FPlantSpecieData>* data = static_cast<UCallbackGetVectorData<FPlantSpecieData>*>(firstArg);
 
-		UCallbackGetVectorData<std::string>* Data = static_cast<UCallbackGetVectorData<std::string>*>(data);
+        std::vector<FPlantSpecieData>* vectorToFill = data->VectorToFill;
+        std::vector<std::string>* columnNames = data->ColumnNames;
+
+        FPlantSpecieData entry;
 
 		for (int i = 0; i < num; ++i)
 		{
-			if (colName[i] == Data->ColumnName)
+		    if(i == 0)
+            {
+                std::stringstream(colValue[i]) >> entry.Id;
+            }
+			else if (i == 1)
 			{
-				Data->VectorToFill->emplace_back(colValue[i]);
+			    entry.Name = std::string(colValue[i]);
 			}
 		}
+
+        vectorToFill->emplace_back(entry);
+		*/
+
+		std::function<void()>* funcToCall = static_cast<std::function<void()>*>(firstArg);
+		(*funcToCall)();
 
 		return 0;
 	};
 
 	executeSQL(dataBase, selectData.c_str(), printTableData, nullptr, &sqlErrorMsg);
 
-	//UCallbackGetVectorData<std::string>* callbackData = new UCallbackGetVectorData<std::string>();
-	UCallbackGetVectorData<std::string> callbackData;
-	callbackData.ColumnName = columnName;
-	callbackData.VectorToFill = &plantNames;
+	UCallbackGetVectorData<FPlantSpecieData> callbackData;
+	callbackData.ColumnNames = &plants_ColumnNames;
+	callbackData.VectorToFill = &speciesData;
 
-	//std::cout << &callbackData << std::endl;
-	executeSQL(dataBase, selectData.c_str(), getPlantNames, &callbackData, &sqlErrorMsg);
-	//delete(callbackData);
+	std::function<void()> someLambda = [&]()
+	{
+		std::cout << "***" << std::endl;
+		std::cout << "Lambda:" << std::endl;
+		std::cout << rowid_ColumnName_PlantsTable << std::endl;
+		std::cout << "***" << std::endl;
+	};
+
+	executeSQL(dataBase, selectData.c_str(), getSpeciesData, &someLambda, &sqlErrorMsg);
 
 	GLFWwindow *window;
 
@@ -337,9 +368,9 @@ int main(void)
 				ImGui::Text("2) Suaeda maritima (L.) Dumort.");
 				ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");*/
 
-				for (const std::string& name : plantNames)
+				for (const FPlantSpecieData& entry : speciesData)
 				{
-					ImGui::Text(name.c_str());
+					ImGui::Text(entry.Name.c_str());
 				}
 
 				ImGui::Separator();
@@ -414,9 +445,11 @@ int main(void)
 
 			if (show_another_window)
 			{
-				ImGui::Begin("Another Window", &show_another_window);
+				ImGui::Begin("INFO", &show_another_window);
 
 				ImGui::Text("Hello from another window!");
+
+				ImGui::Text("ID = %d", 112);
 
 				if (ImGui::Button("Close Me"))
 				{

@@ -4,6 +4,14 @@
 #include "AgeTypeDataEntry.h"
 #include <vector>
 #include <iostream>
+#include "AgeTypeData.h"
+
+struct FPlantSpecieData
+{
+    int Id = -1;
+    std::string Name;
+	AgeTypeData mAgeTypesData;
+};
 
 struct FPlantData
 {

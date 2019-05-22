@@ -9,7 +9,7 @@ template <typename T>
 class UCallbackGetVectorData : public UCallbackDataBase
 {
 public:
-	std::string ColumnName;
+	std::vector<std::string>* ColumnNames;
 	std::vector<T>* VectorToFill;
 private:
 
