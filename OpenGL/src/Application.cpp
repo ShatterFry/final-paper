@@ -364,9 +364,9 @@ int main(void)
 				//ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
 				//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-				/*ImGui::Text("1) Halocnemum strobilaceum (Pall.) M.Bieb.");
+				ImGui::Text("1) Halocnemum strobilaceum (Pall.) M.Bieb.");
 				ImGui::Text("2) Suaeda maritima (L.) Dumort.");
-				ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");*/
+				ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");
 
 				for (const FPlantSpecieData& entry : speciesData)
 				{
@@ -414,11 +414,11 @@ int main(void)
 					modellingState = EModellingState::Inactive;
 				}
 
-				ImGui::InputText("Input text", testStr0, testStrLength);
+				//ImGui::InputText("Input text", testStr0, testStrLength);
 
-				ImGui::Combo("Combo", &currentComboItem, comboItems, 5);
+				//ImGui::Combo("Combo", &currentComboItem, comboItems, 5);
 
-				if (ImGui::BeginCombo("Combo 2", currentComboItem2))
+				/*if (ImGui::BeginCombo("Combo 2", currentComboItem2))
 				{
 					for (int i = 0; i < 3; ++i)
 					{
@@ -436,11 +436,11 @@ int main(void)
 					}
 
 					ImGui::EndCombo();
-				}
+				}*/
 
-				ImGui::Selectable("1. I am selectable", &selection[0]);
+				//ImGui::Selectable("1. I am selectable", &selection[0]);
 
-				ImGui::ListBox("ListBox", &currentListBoxItem, listBoxItems, 3);
+				//ImGui::ListBox("ListBox", &currentListBoxItem, listBoxItems, 3);
 			}
 
 			if (show_another_window)
@@ -569,7 +569,7 @@ int main(void)
 							};
 
 							float curtainGrowthIncrease;
-							const float plantsRepulseDistance = 0.2f;
+							const float plantsRepulseDistance = 0.1f;
 							float maxAvailableCurtainIncrease = 0.0f;
 
 							for (int i = 0; i < plants.size(); ++i)
