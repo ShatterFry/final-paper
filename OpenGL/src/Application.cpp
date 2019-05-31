@@ -51,6 +51,12 @@
 
 #include <sstream>
 
+struct FPlantsTableRow
+{
+	int PlantId;
+	std::string PlantName;
+};
+
 void FillOutPlantsData(std::vector<Plant>& plants, int plantId);
 void ScaleToReal(std::vector<Plant>& inPlants, const float scale);
 
@@ -117,12 +123,37 @@ int main(void)
 	std::string createTable("CREATE TABLE IF NOT EXISTS " + plants_TableName + "(" + plantName_ColumnName + " " +
 		plantName_ColumnType + ");");
 
-	std::string insertData = std::string("INSERT INTO " + plants_TableName + "(" + plantName_ColumnName +
-			") VALUES('Halocnemum strobilaceum (Pall.) M.Bieb.');") +
+	std::vector<FPlantsTableRow> rowsToInsert;
+
+	FPlantsTableRow row1;
+	row1.PlantId = 1;
+	row1.PlantName = std::string("Halocnemum strobilaceum (Pall.) M.Bieb.");
+	rowsToInsert.emplace_back(row1);
+
+	FPlantsTableRow row2;
+	row2.PlantId = 2;
+	row2.PlantName = std::string("Suaeda maritima (L.) Dumort.");
+	rowsToInsert.emplace_back(row2);
+
+	FPlantsTableRow row3;
+	row3.PlantId = 3;
+	row3.PlantName = std::string("Eremopyrum orientale (L.) Jaub. & Spach");
+	rowsToInsert.emplace_back(row3);
+
+	std::string fullInsertStm;
+	for (int i = 0; i < rowsToInsert.size(); ++i)
+	{
+		std::string stmPart = std::string("INSERT INTO " + plants_TableName + "(" + rowid_ColumnName_PlantsTable + ", " + plantName_ColumnName +
+			") VALUES(" + std::to_string(rowsToInsert[i].PlantId) + ", " + "'" + rowsToInsert[i].PlantName + "'" + ");");
+		fullInsertStm += stmPart;
+	}
+
+	/*std::string insertData = std::string("INSERT INTO " + plants_TableName + "(" + rowid_ColumnName_PlantsTable + ", " + plantName_ColumnName +
+			") VALUES(1, 'Halocnemum strobilaceum (Pall.) M.Bieb.');") +
 		std::string("INSERT INTO " + plants_TableName + "(" + plantName_ColumnName +
-			") VALUES('Suaeda maritima (L.) Dumort.');") +
+			") VALUES(2, 'Suaeda maritima (L.) Dumort.');") +
 		std::string("INSERT INTO " + plants_TableName + "(" + plantName_ColumnName +
-			") VALUES('Eremopyrum orientale (L.) Jaub. & Spach');");
+			") VALUES(3, 'Eremopyrum orientale (L.) Jaub. & Spach');");*/
 
 	std::string selectData("SELECT " + rowid_ColumnName_PlantsTable + ", " + plantName_ColumnName + " FROM " +
                         plants_TableName + ";");
@@ -158,9 +189,10 @@ int main(void)
 
 	executeSQL(dataBase, dropTable.c_str(), nullptr, nullptr, &sqlErrorMsg);
 	executeSQL(dataBase, createTable.c_str(), nullptr, nullptr, &sqlErrorMsg);
-	executeSQL(dataBase, insertData.c_str(), nullptr, nullptr, &sqlErrorMsg);
+	executeSQL(dataBase, fullInsertStm.c_str(), nullptr, nullptr, &sqlErrorMsg);
 
     std::vector<FPlantSpecieData> speciesData;
+	std::vector<FPlantsTableRow> plantsTableRows;
 
 	auto getSpeciesData = [](void* firstArg, int num, char** colValue, char** colName)
 	{
@@ -186,8 +218,13 @@ int main(void)
         vectorToFill->emplace_back(entry);
 		*/
 
-		std::function<void()>* funcToCall = static_cast<std::function<void()>*>(firstArg);
-		(*funcToCall)();
+		std::function<void(const FPlantsTableRow&)>* funcToCall = static_cast<std::function<void(const FPlantsTableRow&)>*>(firstArg);
+
+		FPlantsTableRow row;
+		std::stringstream(colValue[0]) >> row.PlantId;
+		row.PlantName = std::string(colValue[1]);
+
+		(*funcToCall)(row);
 
 		return 0;
 	};
@@ -198,15 +235,17 @@ int main(void)
 	callbackData.ColumnNames = &plants_ColumnNames;
 	callbackData.VectorToFill = &speciesData;
 
-	std::function<void()> someLambda = [&]()
+	std::function<void(const FPlantsTableRow&)> getPlantsTableRow = [&](const FPlantsTableRow& row)
 	{
 		std::cout << "***" << std::endl;
 		std::cout << "Lambda:" << std::endl;
 		std::cout << rowid_ColumnName_PlantsTable << std::endl;
 		std::cout << "***" << std::endl;
+
+		plantsTableRows.emplace_back(row);
 	};
 
-	executeSQL(dataBase, selectData.c_str(), getSpeciesData, &someLambda, &sqlErrorMsg);
+	executeSQL(dataBase, selectData.c_str(), getSpeciesData, &getPlantsTableRow, &sqlErrorMsg);
 
 	GLFWwindow *window;
 
@@ -364,13 +403,13 @@ int main(void)
 				//ImGui::SliderFloat3("Translation B", &translationB.x, 0.0f, 960.0f);
 				//ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 
-				ImGui::Text("1) Halocnemum strobilaceum (Pall.) M.Bieb.");
-				ImGui::Text("2) Suaeda maritima (L.) Dumort.");
-				ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");
+				//ImGui::Text("1) Halocnemum strobilaceum (Pall.) M.Bieb.");
+				//ImGui::Text("2) Suaeda maritima (L.) Dumort.");
+				//ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");
 
-				for (const FPlantSpecieData& entry : speciesData)
+				for (const FPlantsTableRow& row : plantsTableRows)
 				{
-					ImGui::Text(entry.Name.c_str());
+					ImGui::Text(row.PlantName.c_str());
 				}
 
 				ImGui::Separator();
