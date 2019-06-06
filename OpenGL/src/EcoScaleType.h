@@ -2,7 +2,6 @@
 
 enum class EEcoScaleType
 {
-	NONE,
 	OM,
 	HD,
 	TR,
@@ -10,3 +9,5 @@ enum class EEcoScaleType
 	LC,
 	MAX
 };
+
+std::string GetEcoScaleAbbreviation(EEcoScaleType inType);

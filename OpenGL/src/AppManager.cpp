@@ -217,43 +217,43 @@ void AppManager::SyncExternalDataFromYAML()
 
 	AgeTypeData ageTypesDataGenerated;
 
-	AgeTypeDataEntry& seDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::se) - 1];
+	AgeTypeDataEntry& seDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::se)];
 	seDataEntry.mMinAge = 1;
 	seDataEntry.mMaxAge = 1;
 
-	AgeTypeDataEntry& pDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::p) - 1];
+	AgeTypeDataEntry& pDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::p)];
 	pDataEntry.mMinAge = 1;
 	pDataEntry.mMaxAge = 1;
 
-	AgeTypeDataEntry& jDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::j) - 1];
+	AgeTypeDataEntry& jDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::j)];
 	jDataEntry.mMinAge = 1;
 	jDataEntry.mMaxAge = 1;
 
-	AgeTypeDataEntry& imDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::im) - 1];
+	AgeTypeDataEntry& imDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::im)];
 	imDataEntry.mMinAge = 1;
 	imDataEntry.mMaxAge = 3;
 
-	AgeTypeDataEntry& vDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::v) - 1];
+	AgeTypeDataEntry& vDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::v)];
 	vDataEntry.mMinAge = 1;
 	vDataEntry.mMaxAge = 5;
 
-	AgeTypeDataEntry& g1DataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::g1) - 1];
+	AgeTypeDataEntry& g1DataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::g1)];
 	g1DataEntry.mMinAge = 1;
 	g1DataEntry.mMaxAge = 4;
 
-	AgeTypeDataEntry& g2DataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::g2) - 1];
+	AgeTypeDataEntry& g2DataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::g2)];
 	g2DataEntry.mMinAge = 5;
 	g2DataEntry.mMaxAge = 5;
 
-	AgeTypeDataEntry& g3DataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::g3) - 1];
+	AgeTypeDataEntry& g3DataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::g3)];
 	g3DataEntry.mMinAge = 1;
 	g3DataEntry.mMaxAge = 2;
 
-	AgeTypeDataEntry& ssDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::ss) - 1];
+	AgeTypeDataEntry& ssDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::ss)];
 	ssDataEntry.mMinAge = 1;
 	ssDataEntry.mMaxAge = 2;
 
-	AgeTypeDataEntry& sDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::s) - 1];
+	AgeTypeDataEntry& sDataEntry = ageTypesDataGenerated.GetData()[static_cast<int>(EAgeType::s)];
 	sDataEntry.mMinAge = 1;
 	sDataEntry.mMaxAge = 2;
 

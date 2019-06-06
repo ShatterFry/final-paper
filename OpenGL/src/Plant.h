@@ -18,7 +18,7 @@ struct FPlantData
 	int PlantId = -1;
 	std::vector<float> Center;
 	float Radius = 0.0f;
-	EAgeType AgeType = EAgeType::NONE;
+	EAgeType AgeType = EAgeType::MAX;
 };
 
 class Plant

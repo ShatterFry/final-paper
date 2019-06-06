@@ -8,8 +8,8 @@
 
 #include <cmath>
 
-#include "../../dependencies/glew/include/GL/glew.h"
-#include "../../dependencies/glfw/include/GLFW/glfw3.h"
+#include "GL/glew.h"
+#include "GLFW/glfw3.h"
 
 #include <iostream>
 #include <vector>
@@ -50,18 +50,304 @@
 #define SCREEN_HEIGHT 540
 
 #include <sstream>
+#include <set>
+
+#include "AgeTypesTable.h"
 
 struct FPlantsTableRow
 {
-	int PlantId;
 	std::string PlantName;
+};
+
+struct FAgeTypesDataTableRow
+{
+	int PlantId;
+	AgeTypeDataEntry AgeTypesData[static_cast<int>(EAgeType::MAX)];
 };
 
 void FillOutPlantsData(std::vector<Plant>& plants, int plantId);
 void ScaleToReal(std::vector<Plant>& inPlants, const float scale);
 
+std::string plants_TableName("plants");
+std::string ageTypes_TableName("ageTypes");
+std::string ecoScales_TableName("ecoScales");
+
+std::string ecoScalesTable_ColumnType("int");
+
+std::string rowid_ColumnName("rowid");
+
+std::string plantName_ColumnName("plantName");
+std::string plantName_ColumnType("varchar(50)");
+
+std::string ageBoundaryColumnType("int");
+
+std::string se_Min_ColumnName("seMin");
+std::string se_Max_ColumnName("seMax");
+
+std::string p_Min_ColumnName("pMin");
+std::string p_Max_ColumnName("pMax");
+
+std::string j_Min_ColumnName("jMin");
+std::string j_Max_ColumnName("jMax");
+
+std::string im_Min_ColumnName("imMin");
+std::string im_Max_ColumnName("imMax");
+
+std::string v_Min_ColumnName("vMin");
+std::string v_Max_ColumnName("vMax");
+
+std::string g1_Min_ColumnName("g1Min");
+std::string g1_Max_ColumnName("g1Max");
+
+std::string g2_Min_ColumnName("g2Min");
+std::string g2_Max_ColumnName("g2Max");
+
+std::string g3_Min_ColumnName("g3Min");
+std::string g3_Max_ColumnName("g3Max");
+
+std::string ss_Min_ColumnNane("ssMin");
+std::string ss_Max_ColumnName("ssMax");
+
+std::string s_Min_ColumnName("sMin");
+std::string s_Max_ColumnName("sMax");
+
+void ExecuteSql(sqlite3* db, const char* statement, int(*callback)(void*, int, char**, char**), void* firstArg, char** errMsg)
+{
+	if (sqlite3_exec(db, statement, callback, firstArg, errMsg) != SQLITE_OK)
+	{
+		std::cout << "SQL error: " << *errMsg << std::endl;
+		sqlite3_free(*errMsg);
+	}
+}
+
+void InsertTestRows(sqlite3* inDataBase, const std::string& inTableName)
+{
+	std::string sqlStatement;
+	char* errorMessage;
+
+	if (inTableName == plants_TableName)
+	{
+		std::map<int, FPlantsTableRow> rowsToInsert;
+
+		FPlantsTableRow row1;
+		row1.PlantName = std::string("Halocnemum strobilaceum (Pall.) M.Bieb.");
+		rowsToInsert.emplace(1, row1);
+
+		FPlantsTableRow row2;
+		row2.PlantName = std::string("Suaeda maritima (L.) Dumort.");
+		rowsToInsert.emplace(2, row2);
+
+		FPlantsTableRow row3;
+		row3.PlantName = std::string("Eremopyrum orientale (L.) Jaub. & Spach");
+		rowsToInsert.emplace(3, row3);
+
+		for (const std::pair<int, FPlantsTableRow> elem : rowsToInsert)
+		{
+			sqlStatement += std::string("INSERT INTO " + plants_TableName + "(" +
+				rowid_ColumnName + ", " + plantName_ColumnName +
+				") VALUES(" + std::to_string(elem.first) + ", " + "'" +
+				elem.second.PlantName + "'" + ");");
+		}
+	}
+	else if (inTableName == ageTypes_TableName)
+	{
+		for (int i = 1; i < 4; ++i)
+		{
+			sqlStatement += std::string("INSERT INTO " + ageTypes_TableName + "(" + rowid_ColumnName + ", ");
+
+			for (int j = 0; j < static_cast<int>(EAgeType::MAX); ++j)
+			{
+				EAgeType ageType = static_cast<EAgeType>(j);
+				std::string ageTypeAbbrev = GetAgeTypeAbbrev(ageType);
+
+				sqlStatement += (ageTypeAbbrev + std::string("Min, "));
+				sqlStatement += (ageTypeAbbrev + std::string("Max"));
+				if ( ageType != static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1) )
+				{
+					sqlStatement += ", ";
+				}
+			}
+
+			sqlStatement += (std::string(") VALUES(") + std::to_string(i) + ", ");
+
+			for (int j = 0; j < static_cast<int>(EAgeType::MAX); ++j)
+			{
+				sqlStatement += (std::to_string(6) + ", ");
+				sqlStatement += (std::to_string(9));
+
+				EAgeType ageType = static_cast<EAgeType>(j);
+				if (ageType != static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1))
+				{
+					sqlStatement += ", ";
+				}
+			}
+
+			sqlStatement += ");";
+		}
+	}
+	else if (inTableName == ecoScales_TableName)
+	{
+		for (int i = 6; i < 9; ++i)
+		{
+			sqlStatement += std::string("INSERT INTO " + ecoScales_TableName + "(" + rowid_ColumnName +
+				", ");
+
+			for (int j = 0; j < static_cast<int>(EEcoScaleType::MAX); ++j)
+			{
+				EEcoScaleType type = static_cast<EEcoScaleType>(j);
+
+				const std::string typeAbbrev = GetEcoScaleAbbreviation(type);
+
+				sqlStatement += typeAbbrev + "Min, ";
+				sqlStatement += typeAbbrev + "Max";
+
+				if (j != (static_cast<int>(EEcoScaleType::MAX) - 1))
+				{
+					sqlStatement += ", ";
+				}
+			}
+
+			sqlStatement += ") VALUES(" + std::to_string(i) + ", ";
+
+			for (int j = 0; j < static_cast<int>(EEcoScaleType::MAX); ++j)
+			{
+				sqlStatement += "6, ";
+				sqlStatement += "9";
+
+				if (j != (static_cast<int>(EEcoScaleType::MAX) - 1))
+				{
+					sqlStatement += ", ";
+				}
+			}
+
+			sqlStatement += ");";
+		}
+	}
+
+	ExecuteSql(inDataBase, sqlStatement.c_str(), nullptr, nullptr, &errorMessage);
+}
+
+void CreateTable(sqlite3* inDataBase, const std::string& inTableName)
+{
+	std::string sqlStatement;
+	char* sqlErrorMessage;
+
+	if (inTableName == plants_TableName)
+	{
+		sqlStatement = std::string( "CREATE TABLE IF NOT EXISTS " + plants_TableName + "(" +
+			plantName_ColumnName + " " +
+			plantName_ColumnType + ");" );
+	}
+	else if (inTableName == ageTypes_TableName)
+	{
+		sqlStatement = std::string("CREATE TABLE IF NOT EXISTS " + ageTypes_TableName + "(");
+
+		for (int i = 0; i < static_cast<int>(EAgeType::MAX); ++i)
+		{
+			EAgeType ageType = static_cast<EAgeType>(i);
+			const std::string& ageTypeAbbrev = GetAgeTypeAbbrev(static_cast<EAgeType>(i));
+
+			sqlStatement += ageTypeAbbrev + std::string("Min ");
+			sqlStatement += ageBoundaryColumnType;
+			sqlStatement += std::string(", ");
+
+			sqlStatement += ageTypeAbbrev + std::string("Max ");
+			sqlStatement += ageBoundaryColumnType;
+			if ( ageType != static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1) )
+			{
+				sqlStatement += std::string(", ");
+			}
+		}
+
+		sqlStatement += ");";
+	}
+	else if (inTableName == ecoScales_TableName)
+	{
+		sqlStatement = std::string("CREATE TABLE IF NOT EXISTS " + ecoScales_TableName + "(");
+
+		for (int i = 0; i < static_cast<int>(EEcoScaleType::MAX); ++i)
+		{
+			EEcoScaleType type = static_cast<EEcoScaleType>(i);
+			const std::string typeAbbrev = GetEcoScaleAbbreviation(type);
+
+			sqlStatement += (typeAbbrev + "Min ");
+			sqlStatement += ecoScalesTable_ColumnType + ", ";
+
+			sqlStatement += (typeAbbrev + "Max ");
+			sqlStatement += ecoScalesTable_ColumnType;
+
+			if (i != (static_cast<int>(EEcoScaleType::MAX) - 1))
+			{
+				sqlStatement += ", ";
+			}
+		}
+
+		sqlStatement += std::string(");");
+	}
+
+	ExecuteSql(inDataBase, sqlStatement.c_str(), nullptr, nullptr, &sqlErrorMessage);
+}
+
+void SelectAllTableData(sqlite3* inDataBase, const std::string& inTableName,
+	int(*inCallback)(void*, int, char**, char**), void* inCallbackFirstArg = nullptr)
+{
+	std::string sqlStatement;
+	char* sqlErrorMsg;
+
+	if (inTableName == plants_TableName)
+	{
+		sqlStatement = std::string("SELECT " + rowid_ColumnName + ", " + plantName_ColumnName +
+			" FROM " + plants_TableName + ";");
+	}
+	else if (inTableName == ageTypes_TableName)
+	{
+		sqlStatement = std::string("SELECT " + rowid_ColumnName + ", ");
+
+		for (int i = 0; i < static_cast<int>(EAgeType::MAX); ++i)
+		{
+			EAgeType ageType = static_cast<EAgeType>(i);
+			sqlStatement += GetAgeTypeAbbrev(ageType) + "Min, ";
+
+			if ( ageType == static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1) )
+			{
+				sqlStatement += GetAgeTypeAbbrev(ageType) + "Max ";
+			}
+			else
+			{
+				sqlStatement += GetAgeTypeAbbrev(ageType) + "Max, ";
+			}
+		}
+
+		sqlStatement += "FROM " + ageTypes_TableName + ";";
+	}
+	else if (inTableName == ecoScales_TableName)
+	{
+		sqlStatement += "SELECT " + rowid_ColumnName + ", ";
+
+		for (int i = 0; i < static_cast<int>(EEcoScaleType::MAX); ++i)
+		{
+			EEcoScaleType type = static_cast<EEcoScaleType>(i);
+			const std::string typeAbbrev = GetEcoScaleAbbreviation(type);
+
+			sqlStatement += typeAbbrev + "Min, ";
+			sqlStatement += typeAbbrev + "Max";
+
+			if ( i != (static_cast<int>(EEcoScaleType::MAX) - 1) )
+			{
+				sqlStatement += ", ";
+			}
+		}
+
+		sqlStatement += " FROM " + ecoScales_TableName + ";";
+	}
+
+	ExecuteSql(inDataBase, sqlStatement.c_str(), inCallback, inCallbackFirstArg, &sqlErrorMsg);
+}
+
 int main(void)
 {
+	AgeTypesTable ageTypesTable;
+
 	AppManager* appMgr = GetAppInstance()->GetAppManager();
 	appMgr->SetDataSource(EDataSource::YAML);
 	appMgr->SyncExternalData();
@@ -71,7 +357,7 @@ int main(void)
 	EModellingState modellingState = EModellingState::Inactive;
 
 	std::vector<Plant> plants;
-	std::shared_ptr<AgeRadiusVector> averageRadiuses = std::make_shared<AgeRadiusVector>(static_cast<int>(EAgeType::MAX) - 1, 0.0f);
+	std::shared_ptr<AgeRadiusVector> averageRadiuses = std::make_shared<AgeRadiusVector>(static_cast<int>(EAgeType::MAX), 0.0f);
 
 	bool bProduceChildren = false;
 
@@ -101,7 +387,7 @@ int main(void)
 
 	sqlite3* dataBase;
 
-	char* sqlErrorMsg;
+	char* sqlErrorMsg = nullptr;
 
 	if (sqlite3_open("myDataBase.dblite", &dataBase))
 	{
@@ -110,142 +396,69 @@ int main(void)
 		return 0;
 	}
 
-	std::string plants_TableName("plants");
-
-	std::string dropTable("DROP TABLE IF EXISTS " + plants_TableName);
-
-    std::string rowid_ColumnName_PlantsTable("rowid");
-	std::string plantName_ColumnName("plantName");
-	std::string plantName_ColumnType("varchar(50)");
-
-	std::vector<std::string> plants_ColumnNames = { rowid_ColumnName_PlantsTable, plantName_ColumnName};
-
-	std::string createTable("CREATE TABLE IF NOT EXISTS " + plants_TableName + "(" + plantName_ColumnName + " " +
-		plantName_ColumnType + ");");
-
-	std::vector<FPlantsTableRow> rowsToInsert;
-
-	FPlantsTableRow row1;
-	row1.PlantId = 1;
-	row1.PlantName = std::string("Halocnemum strobilaceum (Pall.) M.Bieb.");
-	rowsToInsert.emplace_back(row1);
-
-	FPlantsTableRow row2;
-	row2.PlantId = 2;
-	row2.PlantName = std::string("Suaeda maritima (L.) Dumort.");
-	rowsToInsert.emplace_back(row2);
-
-	FPlantsTableRow row3;
-	row3.PlantId = 3;
-	row3.PlantName = std::string("Eremopyrum orientale (L.) Jaub. & Spach");
-	rowsToInsert.emplace_back(row3);
-
-	std::string fullInsertStm;
-	for (int i = 0; i < rowsToInsert.size(); ++i)
-	{
-		std::string stmPart = std::string("INSERT INTO " + plants_TableName + "(" + rowid_ColumnName_PlantsTable + ", " + plantName_ColumnName +
-			") VALUES(" + std::to_string(rowsToInsert[i].PlantId) + ", " + "'" + rowsToInsert[i].PlantName + "'" + ");");
-		fullInsertStm += stmPart;
-	}
-
-	/*std::string insertData = std::string("INSERT INTO " + plants_TableName + "(" + rowid_ColumnName_PlantsTable + ", " + plantName_ColumnName +
-			") VALUES(1, 'Halocnemum strobilaceum (Pall.) M.Bieb.');") +
-		std::string("INSERT INTO " + plants_TableName + "(" + plantName_ColumnName +
-			") VALUES(2, 'Suaeda maritima (L.) Dumort.');") +
-		std::string("INSERT INTO " + plants_TableName + "(" + plantName_ColumnName +
-			") VALUES(3, 'Eremopyrum orientale (L.) Jaub. & Spach');");*/
-
-	std::string selectData("SELECT " + rowid_ColumnName_PlantsTable + ", " + plantName_ColumnName + " FROM " +
-                        plants_TableName + ";");
-
-	/*testSqlStatement = std::string("CREATE TABLE IF NOT EXISTS testTable(a, b, c);") +
-		std::string("INSERT INTO testTable VALUES(1,2,3);") +
-		std::string("SELECT * FROM testTable;");*/
-
-	//testSqlStatement = "DROP TABLE IF EXISTS testTable";
-
 	auto printTableData = [](void* firstArg, int colNum, char** colValues, char** colNames)
 	{
-	    std::cout << "printTableData" << std::endl;
-        std::cout << "colNum = " << colNum << std::endl;
+		//std::string tableName = *(static_cast<std::string*>(firstArg));
+
+	    std::cout << "Print Table Data" << std::endl;
+
+        std::cout << "Column Num = " << colNum << std::endl;
 
 		for (int i = 0; i < colNum; ++i)
 		{
 			std::cout << colNames[i] << " = " << (colValues[i] ? colValues[i] : "NULL") << std::endl;
 		}
+
         std::cout << "\n";
 
 		return 0;
 	};
 
-	auto executeSQL = [](sqlite3* db, const char* statement, int(*callback)(void*, int, char**, char**), void* firstArg, char** errMsg)
+
+	auto dropTable = [&](const std::string& inTableName)
 	{
-		if (sqlite3_exec(db, statement, callback, firstArg, errMsg) != SQLITE_OK)
-		{
-			std::cout << "SQL error: " << *errMsg << std::endl;
-			sqlite3_free(*errMsg);
-		}
+		std::string sqlStm("DROP TABLE IF EXISTS " + inTableName + ";");
+		ExecuteSql(dataBase, sqlStm.c_str(), nullptr, nullptr, &sqlErrorMsg);
 	};
 
-	executeSQL(dataBase, dropTable.c_str(), nullptr, nullptr, &sqlErrorMsg);
-	executeSQL(dataBase, createTable.c_str(), nullptr, nullptr, &sqlErrorMsg);
-	executeSQL(dataBase, fullInsertStm.c_str(), nullptr, nullptr, &sqlErrorMsg);
+	dropTable(plants_TableName);
+	dropTable(ageTypes_TableName);
+	dropTable(ecoScales_TableName);
 
-    std::vector<FPlantSpecieData> speciesData;
-	std::vector<FPlantsTableRow> plantsTableRows;
+	CreateTable(dataBase, plants_TableName);
+	CreateTable(dataBase, ageTypes_TableName);
+	CreateTable(dataBase, ecoScales_TableName);
+
+	InsertTestRows(dataBase, plants_TableName);
+	InsertTestRows(dataBase, ageTypes_TableName);
+	InsertTestRows(dataBase, ecoScales_TableName);
+
+	std::map<int, FPlantsTableRow> plantsTableRows;
+
+	SelectAllTableData(dataBase, plants_TableName, printTableData);
+	SelectAllTableData(dataBase, ageTypes_TableName, printTableData);
+	SelectAllTableData(dataBase, ecoScales_TableName, printTableData);
 
 	auto getSpeciesData = [](void* firstArg, int num, char** colValue, char** colName)
 	{
-		/*UCallbackGetVectorData<FPlantSpecieData>* data = static_cast<UCallbackGetVectorData<FPlantSpecieData>*>(firstArg);
+		std::function<void(const std::pair<int, FPlantsTableRow>&)>* funcToCall = static_cast<std::function<void(const std::pair<int, FPlantsTableRow>&)>*>(firstArg);
 
-        std::vector<FPlantSpecieData>* vectorToFill = data->VectorToFill;
-        std::vector<std::string>* columnNames = data->ColumnNames;
+		std::pair<int, FPlantsTableRow> pair;
+		std::stringstream(colValue[0]) >> pair.first;
+		pair.second.PlantName = std::string(colValue[1]);
 
-        FPlantSpecieData entry;
-
-		for (int i = 0; i < num; ++i)
-		{
-		    if(i == 0)
-            {
-                std::stringstream(colValue[i]) >> entry.Id;
-            }
-			else if (i == 1)
-			{
-			    entry.Name = std::string(colValue[i]);
-			}
-		}
-
-        vectorToFill->emplace_back(entry);
-		*/
-
-		std::function<void(const FPlantsTableRow&)>* funcToCall = static_cast<std::function<void(const FPlantsTableRow&)>*>(firstArg);
-
-		FPlantsTableRow row;
-		std::stringstream(colValue[0]) >> row.PlantId;
-		row.PlantName = std::string(colValue[1]);
-
-		(*funcToCall)(row);
+		(*funcToCall)(pair);
 
 		return 0;
 	};
 
-	executeSQL(dataBase, selectData.c_str(), printTableData, nullptr, &sqlErrorMsg);
-
-	UCallbackGetVectorData<FPlantSpecieData> callbackData;
-	callbackData.ColumnNames = &plants_ColumnNames;
-	callbackData.VectorToFill = &speciesData;
-
-	std::function<void(const FPlantsTableRow&)> getPlantsTableRow = [&](const FPlantsTableRow& row)
+	std::function<void(const std::pair<int, FPlantsTableRow>&)> savePlantsTableRow = [&](const std::pair<int, FPlantsTableRow>& pair)
 	{
-		std::cout << "***" << std::endl;
-		std::cout << "Lambda:" << std::endl;
-		std::cout << rowid_ColumnName_PlantsTable << std::endl;
-		std::cout << "***" << std::endl;
-
-		plantsTableRows.emplace_back(row);
+		plantsTableRows.emplace(pair);
 	};
 
-	executeSQL(dataBase, selectData.c_str(), getSpeciesData, &getPlantsTableRow, &sqlErrorMsg);
+	//ExecuteSql(dataBase, selectPlantsTableData.c_str(), getSpeciesData, &savePlantsTableRow, &sqlErrorMsg);
+	SelectAllTableData(dataBase, plants_TableName, getSpeciesData, &savePlantsTableRow);
 
 	GLFWwindow *window;
 
@@ -407,9 +620,9 @@ int main(void)
 				//ImGui::Text("2) Suaeda maritima (L.) Dumort.");
 				//ImGui::Text("3) Eremopyrum orientale (L.) Jaub. & Spach");
 
-				for (const FPlantsTableRow& row : plantsTableRows)
+				for (const std::pair<int, FPlantsTableRow>& pair : plantsTableRows)
 				{
-					ImGui::Text(row.PlantName.c_str());
+					ImGui::Text(pair.second.PlantName.c_str());
 				}
 
 				ImGui::Separator();
@@ -575,20 +788,20 @@ int main(void)
 						{
 							it->SetAgeType(newAgeType);
 							it->SetAccumulatedAge(it->GetAccumulatedAge() + ageIncrease);
-							int ageTypesNum = static_cast<int>(EAgeType::MAX) - 1;
+							int ageTypesNum = static_cast<int>(EAgeType::MAX);
 
 							std::vector<float> curtainGrowthCoeffs(ageTypesNum, 0);
 
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::se) - 1] = 25.0f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::p) - 1] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::j) - 1] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::im) - 1] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::v) - 1] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::g1) - 1] = 0.1f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::g2) - 1] = 0.1f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::g3) - 1] = 0.1f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::ss) - 1] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::s) - 1] = 0.2f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::se)] = 25.0f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::p)] = 0.2f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::j)] = 0.2f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::im)] = 0.2f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::v)] = 0.2f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::g1)] = 0.1f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::g2)] = 0.1f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::g3)] = 0.1f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::ss)] = 0.2f;
+							curtainGrowthCoeffs[static_cast<int>(EAgeType::s)] = 0.2f;
 
 							//float currentDiameter = it->GetDiameter();
 							float currentRadius = it->GetRadius();

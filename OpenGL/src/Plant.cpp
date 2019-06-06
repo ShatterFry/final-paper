@@ -1,6 +1,6 @@
 #include "Plant.h"
 
-Plant::Plant() : mId(0), mCenter({}), mDiameter(0.0f), mAgeType(EAgeType::NONE)
+Plant::Plant() : mId(0), mCenter({}), mDiameter(0.0f), mAgeType(EAgeType::MAX)
 {
 
 }
