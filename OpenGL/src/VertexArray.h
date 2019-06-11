@@ -37,8 +37,8 @@ public:
             {
                 FFunctionCallback functionToCall = [&]()
                 {
-                    glVertexAttribPointer(i, element.count, element.type, element.normalized, layout.GetStride(),
-                    (const void*)offset);
+                    glVertexAttribPointer(i, element.count, element.type, element.normalized,
+						layout.GetStride(), (const void*)offset);
                 };
                 GLCall(functionToCall);
             }

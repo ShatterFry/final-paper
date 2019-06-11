@@ -105,7 +105,7 @@
       <PreprocessorDefinitions>GLEW_STATIC;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\glfw\lib-vc2015;$(SolutionDir)dependencies\glew\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)dependencies\glfw\lib-vc2017-generated;$(SolutionDir)dependencies\glew\lib\Release\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>glfw3.lib;glew32s.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalOptions> /NODEFAULTLIB:library %(AdditionalOptions)</AdditionalOptions>
     </Link>

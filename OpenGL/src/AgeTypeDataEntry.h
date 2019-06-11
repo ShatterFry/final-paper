@@ -1,15 +1,14 @@
 #pragma once
 
 #include <string>
-#include "AgeType.h"
 #include <vector>
 
-//using AgeTypeData = std::vector<struct AgeTypeDataEntry>;
+#include "AgeType.h"
 
 struct AgeTypeDataEntry {
 public:
-	//std::string name;
-	EAgeType mType;
+	EAgeType mType = EAgeType::MAX;
+
 	int mMinAge;
 	int mMaxAge;
 };

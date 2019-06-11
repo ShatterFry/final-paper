@@ -59,10 +59,14 @@ struct FPlantsTableRow
 	std::string PlantName;
 };
 
-struct FAgeTypesDataTableRow
+struct FAgeTypesTableRowData
 {
-	int PlantId;
-	AgeTypeDataEntry AgeTypesData[static_cast<int>(EAgeType::MAX)];
+	std::vector<AgeTypeDataEntry> AgeTypesData;
+};
+
+struct FEcoScaleTableRowData
+{
+	std::vector<EcoScaleDataEntry> EcoScalesData;
 };
 
 void FillOutPlantsData(std::vector<Plant>& plants, int plantId);
@@ -162,6 +166,7 @@ void InsertTestRows(sqlite3* inDataBase, const std::string& inTableName)
 
 				sqlStatement += (ageTypeAbbrev + std::string("Min, "));
 				sqlStatement += (ageTypeAbbrev + std::string("Max"));
+
 				if ( ageType != static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1) )
 				{
 					sqlStatement += ", ";
@@ -172,10 +177,61 @@ void InsertTestRows(sqlite3* inDataBase, const std::string& inTableName)
 
 			for (int j = 0; j < static_cast<int>(EAgeType::MAX); ++j)
 			{
-				sqlStatement += (std::to_string(6) + ", ");
-				sqlStatement += (std::to_string(9));
+				int minAge = 6;
+				int maxAge = 9;
 
 				EAgeType ageType = static_cast<EAgeType>(j);
+
+				switch (ageType)
+				{
+					case EAgeType::se:
+						minAge = 1;
+						maxAge = 1;
+						break;
+					case EAgeType::p:
+						minAge = 1;
+						maxAge = 1;
+						break;
+					case EAgeType::j:
+						minAge = 1;
+						maxAge = 1;
+						break;
+					case EAgeType::im:
+						minAge = 1;
+						maxAge = 3;
+						break;
+					case EAgeType::v:
+						minAge = 1;
+						maxAge = 5;
+						break;
+					case EAgeType::g1:
+						minAge = 1;
+						maxAge = 4;
+						break;
+					case EAgeType::g2:
+						minAge = 5;
+						maxAge = 5;
+						break;
+					case EAgeType::g3:
+						minAge = 1;
+						maxAge = 2;
+						break;
+					case EAgeType::ss:
+						minAge = 1;
+						maxAge = 2;
+						break;
+					case EAgeType::s:
+						minAge = 1;
+						maxAge = 2;
+						break;
+					default:
+						minAge = 0;
+						maxAge = 0;
+						break;
+				}
+
+				sqlStatement += ( std::to_string(minAge) + ", " + std::to_string(maxAge) );
+
 				if (ageType != static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1))
 				{
 					sqlStatement += ", ";
@@ -187,7 +243,37 @@ void InsertTestRows(sqlite3* inDataBase, const std::string& inTableName)
 	}
 	else if (inTableName == ecoScales_TableName)
 	{
-		for (int i = 6; i < 9; ++i)
+		std::vector<int> halocnemumEcoScales =
+		{
+			1, 7, // OM
+			1, 13, // HD
+			10, 19, // TR
+			9, 13, // RC
+			1, 3 // LC
+		};
+
+		std::vector<int> suaedaEcoScales = 
+		{
+			5, 11, // OM
+			2, 18, // HD
+			10, 18, // TR
+			5, 13, // RC
+			1, 4 // LC
+		};
+
+		std::vector<int> eremopyrumEcoScales = 
+		{
+			2, 8, // OM
+			1, 8, // HD
+			7, 16, // TR
+			0, 0, // RC
+			1, 3 // LC
+		};
+
+		std::vector<std::vector<int>> speciesEcoScales = {halocnemumEcoScales, suaedaEcoScales,
+			eremopyrumEcoScales};
+
+		for (int i = 1; i < 4; ++i)
 		{
 			sqlStatement += std::string("INSERT INTO " + ecoScales_TableName + "(" + rowid_ColumnName +
 				", ");
@@ -209,12 +295,42 @@ void InsertTestRows(sqlite3* inDataBase, const std::string& inTableName)
 
 			sqlStatement += ") VALUES(" + std::to_string(i) + ", ";
 
-			for (int j = 0; j < static_cast<int>(EEcoScaleType::MAX); ++j)
+			for (int j = 0; j < static_cast<int>(EEcoScaleType::MAX) * 2; j += 2)
 			{
-				sqlStatement += "6, ";
-				sqlStatement += "9";
+				EEcoScaleType ecoScaleType = static_cast<EEcoScaleType>(j / 2);
 
-				if (j != (static_cast<int>(EEcoScaleType::MAX) - 1))
+				int minValue = speciesEcoScales[i - 1][j];
+				int maxValue = speciesEcoScales[i - 1][j + 1];
+
+				/*switch (ecoScaleType)
+				{
+				case EEcoScaleType::OM:
+					minValue = 1;
+					maxValue = 7;
+					break;
+				case EEcoScaleType::HD:
+					minValue = 1;
+					maxValue = 13;
+					break;
+				case EEcoScaleType::TR:
+					minValue = 10;
+					maxValue = 19;
+					break;
+				case EEcoScaleType::RC:
+					minValue = 9;
+					maxValue = 13;
+					break;
+				case EEcoScaleType::LC:
+					minValue = 1;
+					maxValue = 3;
+					break;
+				default:
+					break;
+				}*/
+
+				sqlStatement += std::to_string(minValue) + ", " + std::to_string(maxValue);
+
+				if (j != (static_cast<int>(EEcoScaleType::MAX) * 2 - 2))
 				{
 					sqlStatement += ", ";
 				}
@@ -344,6 +460,72 @@ void SelectAllTableData(sqlite3* inDataBase, const std::string& inTableName,
 	ExecuteSql(inDataBase, sqlStatement.c_str(), inCallback, inCallbackFirstArg, &sqlErrorMsg);
 }
 
+float CalcEcoNiche(const std::vector<int>& specieIds,
+	const std::map<int, FEcoScaleTableRowData>& inEcoScalesData, int selectedSpecieId)
+{
+	std::map<int, std::map<EEcoScaleType, float>> scalesAvgBySpecie;
+
+	for (int id : specieIds)
+	{
+		std::map<EEcoScaleType, float> curSpecieScalesAvg;
+		const std::vector<EcoScaleDataEntry>& ecoScalesData = inEcoScalesData.at(id).EcoScalesData;
+
+		for (int i = 0; i < ecoScalesData.size(); ++i)
+		{
+			EEcoScaleType ecoScaleType = static_cast<EEcoScaleType>(i);
+			const EcoScaleDataEntry& entry = ecoScalesData[i];
+			curSpecieScalesAvg.emplace( ecoScaleType, (entry.mMin + entry.mMax) * 0.5f );
+		}
+
+		scalesAvgBySpecie.emplace(id, curSpecieScalesAvg);
+	}
+
+	std::map<EEcoScaleType, float> cenopopulationScalesAvg;
+
+	for (int i = 0; i < static_cast<int>(EEcoScaleType::MAX); ++i)
+	{
+		EEcoScaleType ecoScaleType = static_cast<EEcoScaleType>(i);
+		cenopopulationScalesAvg[ecoScaleType] = 0.0f;
+	}
+
+	for (int i = 0; i < static_cast<int>(EEcoScaleType::MAX); ++i)
+	{
+		EEcoScaleType ecoScaleType = static_cast<EEcoScaleType>(i);
+
+		for (int id : specieIds)
+		{
+			cenopopulationScalesAvg[ecoScaleType] += scalesAvgBySpecie[id][ecoScaleType];
+		}
+
+		cenopopulationScalesAvg[ecoScaleType] /= scalesAvgBySpecie.size();
+	}
+
+	std::map<EEcoScaleType, float> scalesRealised;
+	const std::vector<EcoScaleDataEntry>& selectedSpecieScalesData =
+		inEcoScalesData.at(selectedSpecieId).EcoScalesData;
+
+	for (int i = 0; i < static_cast<int>(EEcoScaleType::MAX); ++i)
+	{
+		EEcoScaleType ecoScaleType = static_cast<EEcoScaleType>(i);
+		EcoScaleDataEntry selectedSpecieEntry = selectedSpecieScalesData[i];
+		
+		scalesRealised.emplace( ecoScaleType,
+			(cenopopulationScalesAvg[ecoScaleType] - selectedSpecieEntry.mMin) /
+			(selectedSpecieEntry.mMax - selectedSpecieEntry.mMin) );
+	}
+
+	float realisedEcoNiche = 0.0f;
+
+	for (const std::pair<EEcoScaleType, float>& entry : scalesRealised)
+	{
+		realisedEcoNiche += entry.second;
+	}
+
+	realisedEcoNiche /= static_cast<int>(EEcoScaleType::MAX);
+
+	return realisedEcoNiche;
+}
+
 int main(void)
 {
 	AgeTypesTable ageTypesTable;
@@ -359,9 +541,11 @@ int main(void)
 	std::vector<Plant> plants;
 	std::shared_ptr<AgeRadiusVector> averageRadiuses = std::make_shared<AgeRadiusVector>(static_cast<int>(EAgeType::MAX), 0.0f);
 
-	bool bProduceChildren = false;
-
 	int halocnemumId = 0;
+
+	int halocnemumId_DB = 1;
+	int suaedaId_DB = 2;
+	int eremopyrumId_DB = 3;
 
 	FillOutPlantsData(plants, halocnemumId);
 
@@ -383,8 +567,6 @@ int main(void)
 	const char* listBoxItems[3] = {"Apple", "Banana", "Cherry"};
 	int currentListBoxItem = 0;
 
-	bool show_another_window = true;
-
 	sqlite3* dataBase;
 
 	char* sqlErrorMsg = nullptr;
@@ -398,8 +580,6 @@ int main(void)
 
 	auto printTableData = [](void* firstArg, int colNum, char** colValues, char** colNames)
 	{
-		//std::string tableName = *(static_cast<std::string*>(firstArg));
-
 	    std::cout << "Print Table Data" << std::endl;
 
         std::cout << "Column Num = " << colNum << std::endl;
@@ -434,12 +614,14 @@ int main(void)
 	InsertTestRows(dataBase, ecoScales_TableName);
 
 	std::map<int, FPlantsTableRow> plantsTableRows;
+	std::map<int, FAgeTypesTableRowData> ageTypesRows;
+	std::map<int, FEcoScaleTableRowData> ecoScalesTableRows;
 
 	SelectAllTableData(dataBase, plants_TableName, printTableData);
 	SelectAllTableData(dataBase, ageTypes_TableName, printTableData);
 	SelectAllTableData(dataBase, ecoScales_TableName, printTableData);
 
-	auto getSpeciesData = [](void* firstArg, int num, char** colValue, char** colName)
+	auto getPlantsTableData = [](void* firstArg, int num, char** colValue, char** colName)
 	{
 		std::function<void(const std::pair<int, FPlantsTableRow>&)>* funcToCall = static_cast<std::function<void(const std::pair<int, FPlantsTableRow>&)>*>(firstArg);
 
@@ -452,19 +634,86 @@ int main(void)
 		return 0;
 	};
 
-	std::function<void(const std::pair<int, FPlantsTableRow>&)> savePlantsTableRow = [&](const std::pair<int, FPlantsTableRow>& pair)
+	std::function<void(const std::pair<int, FPlantsTableRow>&)> savePlantsTableRow =
+	[&](const std::pair<int, FPlantsTableRow>& pair)
 	{
 		plantsTableRows.emplace(pair);
 	};
 
-	//ExecuteSql(dataBase, selectPlantsTableData.c_str(), getSpeciesData, &savePlantsTableRow, &sqlErrorMsg);
-	SelectAllTableData(dataBase, plants_TableName, getSpeciesData, &savePlantsTableRow);
+	SelectAllTableData(dataBase, plants_TableName, getPlantsTableData, &savePlantsTableRow);
+
+	auto getAgeTypesTableRow = [](void* firstArg, int colNum, char** colValue, char** colName)
+	{
+		std::function<void(const std::pair<int, FAgeTypesTableRowData>&)>* customCallback =
+			static_cast<std::function<void(const std::pair<int, FAgeTypesTableRowData>&)>*>(firstArg);
+
+		std::pair<int, FAgeTypesTableRowData> rowData;
+
+		std::stringstream(colValue[0]) >> rowData.first;
+
+		for (int i = 1; i < (static_cast<int>(EAgeType::MAX) * 2) + 1; i += 2)
+		{
+			AgeTypeDataEntry entry;
+
+			std::stringstream(colValue[i]) >> entry.mMinAge;
+			std::stringstream(colValue[i + 1]) >> entry.mMaxAge;
+
+			rowData.second.AgeTypesData.emplace_back(entry);
+		}
+
+		(*customCallback)(rowData);
+
+		return 0;
+	};
+
+	std::function<void(const std::pair<int, FAgeTypesTableRowData>&)> saveAgeTypesTableRowData =
+	[&](const std::pair<int, FAgeTypesTableRowData>& pair)
+	{
+		ageTypesRows.emplace(pair);
+	};
+
+	SelectAllTableData(dataBase, ageTypes_TableName, getAgeTypesTableRow, &saveAgeTypesTableRowData);
+
+	{
+		auto tableRowSelectCallback = [](void* firstArg, int colNum, char** colValue, char** colName)
+		{
+			std::function<void(const std::pair<int, FEcoScaleTableRowData>&)>* customCallback =
+				static_cast<std::function<void(const std::pair<int, FEcoScaleTableRowData>&)>*>(firstArg);
+
+			std::pair<int, FEcoScaleTableRowData> pair;
+
+			std::stringstream(colValue[0]) >> pair.first;
+
+			for (int i = 1; i < static_cast<int>(EEcoScaleType::MAX) * 2 + 1 ; i +=2)
+			{
+				EcoScaleDataEntry entry;
+
+				std::stringstream(colValue[i]) >> entry.mMin;
+				std::stringstream(colValue[i + 1]) >> entry.mMax;
+
+				pair.second.EcoScalesData.emplace_back(entry);
+			}
+
+			(*customCallback)(pair);
+
+			return 0;
+		};
+
+		std::function<void(const std::pair<int, FEcoScaleTableRowData>&)> customCallback =
+		[&](const std::pair<int, FEcoScaleTableRowData>& entry)
+		{
+			ecoScalesTableRows.emplace(entry);
+		};
+
+		SelectAllTableData(dataBase, ecoScales_TableName, tableRowSelectCallback, &customCallback);
+	}
 
 	GLFWwindow *window;
 
 	// Initialize the library
 	if (!glfwInit())
 	{
+		std::cout << "GLFW is not initialized!" << std::endl;
 		return -1;
 	}
 
@@ -476,6 +725,9 @@ int main(void)
 
 	if (!window)
 	{
+		std::cout << "GLFW Window is not created!" << std::endl;
+		std::cin.get();
+
 		glfwTerminate();
 		return -1;
 	}
@@ -483,7 +735,8 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-	if (glewInit() != GLEW_OK) {
+	if (glewInit() != GLEW_OK)
+	{
 		std::cout << "Error!" << std::endl;
 	}
 
@@ -563,10 +816,28 @@ int main(void)
 
 		float initialTime = 0.0f;
 		bool modellingActive = false;
-		float actualEcoPct = 0.498f;
+		float actualEcoPercent = 0.498f;
 
 		float accumulatedTime = 0.0f;
 		float passedTime = 0.0f;
+		bool shouldCalcRealisedNiche = true;
+
+		std::vector<float> curtainGrowthCoeffs(static_cast<int>(EAgeType::MAX), 0);
+
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::se)] = 25.0f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::p)] = 0.2f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::j)] = 0.2f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::im)] = 0.2f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::v)] = 0.2f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::g1)] = 0.1f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::g2)] = 0.1f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::g3)] = 0.1f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::ss)] = 0.2f;
+		curtainGrowthCoeffs[static_cast<int>(EAgeType::s)] = 0.2f;
+
+		bool bProduceChildren = true;
+		bool show_another_window = false;
+		float plantsRepulseDistance = 0.1f;
 
 		while (!glfwWindowShouldClose(window))
 		{
@@ -626,11 +897,6 @@ int main(void)
 				}
 
 				ImGui::Separator();
-				ImGui::Text("Implemented niche = %.1f", actualEcoPct);
-
-				ImGui::InputFloat("Scale", &mapScale);
-
-				ImGui::Checkbox("Produce Children", &bProduceChildren);
 
 				if (ImGui::Button("Start") && (modellingState != EModellingState::Active))
 				{
@@ -665,6 +931,33 @@ int main(void)
 					modellingActive = false;
 					modellingState = EModellingState::Inactive;
 				}
+
+				if (shouldCalcRealisedNiche)
+				{
+					shouldCalcRealisedNiche = false;
+					actualEcoPercent = CalcEcoNiche({halocnemumId_DB, suaedaId_DB, eremopyrumId_DB},
+						ecoScalesTableRows, halocnemumId_DB);
+				}
+				ImGui::Text("Implemented niche = %.1f", actualEcoPercent);
+
+				ImGui::InputFloat("Scale", &mapScale);
+
+				//ImGui::Checkbox("Produce Children", &bProduceChildren);
+
+				ImGui::Text("Plants Repulse Distance");
+				ImGui::InputFloat("", &plantsRepulseDistance);
+
+				ImGui::Text("Curtain Growth Coeff");
+				ImGui::InputFloat("SE", &curtainGrowthCoeffs[static_cast<int>(EAgeType::se)]);
+				ImGui::InputFloat("P", &curtainGrowthCoeffs[static_cast<int>(EAgeType::p)]);
+				ImGui::InputFloat("J", &curtainGrowthCoeffs[static_cast<int>(EAgeType::j)]);
+				ImGui::InputFloat("IM", &curtainGrowthCoeffs[static_cast<int>(EAgeType::im)]);
+				ImGui::InputFloat("V", &curtainGrowthCoeffs[static_cast<int>(EAgeType::v)]);
+				ImGui::InputFloat("G1", &curtainGrowthCoeffs[static_cast<int>(EAgeType::g1)]);
+				ImGui::InputFloat("G2", &curtainGrowthCoeffs[static_cast<int>(EAgeType::g2)]);
+				ImGui::InputFloat("G3", &curtainGrowthCoeffs[static_cast<int>(EAgeType::g3)]);
+				ImGui::InputFloat("SS", &curtainGrowthCoeffs[static_cast<int>(EAgeType::ss)]);
+				ImGui::InputFloat("S", &curtainGrowthCoeffs[static_cast<int>(EAgeType::s)]);
 
 				//ImGui::InputText("Input text", testStr0, testStrLength);
 
@@ -747,14 +1040,10 @@ int main(void)
 
 						float seRadius = 0.005f;
 
-						Plant childPlant(halocnemumId, { childX, childY, childZ }, seRadius, EAgeType::se);
+						Plant childPlant(halocnemumId, { childX, childY, childZ }, seRadius,
+							EAgeType::se);
 
 						URectangle boundingRectangle = grid->GetBoundingRectangle();
-
-						/*float maxPositionX = childX + seRadius;
-						float minPositionX = childX - seRadius;
-						float maxPositionY = childY + seRadius;
-						float minPositionY = childY - seRadius;*/
 
 						plantsToAdd.push_back(childPlant);
 						it->SetProducedChild(true);
@@ -762,12 +1051,20 @@ int main(void)
 
 					int index = static_cast<int>(it - plants.begin());
 
-					const std::vector<AgeTypeDataEntry>& plantAgeData = GetAppInstance()->GetAppManager()->GetAgeTypeData(halocnemumId).GetData();
+					AppInstance* appInstance = GetAppInstance();
+					AppManager* appMgr = appInstance->GetAppManager();
 
-					int minAgeTypeDuration = plantAgeData.at(static_cast<int>(it->GetAgeType()) - 1).mMinAge;
-					int maxAgeTypeDuration = plantAgeData.at(static_cast<int>(it->GetAgeType()) - 1).mMaxAge;
+					AgeTypeData& ageTypeData = appMgr->GetAgeTypeData(halocnemumId);
 
-					int resultingAgeDuration = minAgeTypeDuration + (maxAgeTypeDuration - minAgeTypeDuration) * actualEcoPct;
+					const std::vector<AgeTypeDataEntry>& plantAgeData = ageTypeData.GetData();
+
+					EAgeType ageType = it->GetAgeType();
+
+					int minAgeTypeDuration = plantAgeData.at( static_cast<int>(ageType) ).mMinAge;
+					int maxAgeTypeDuration = plantAgeData.at( static_cast<int>(ageType) ).mMaxAge;
+
+					int resultingAgeDuration = minAgeTypeDuration + (maxAgeTypeDuration -
+						minAgeTypeDuration) * actualEcoPercent;
 
 					float ageIncrease = passedYears - it->GetAccumulatedAge();
 
@@ -790,20 +1087,6 @@ int main(void)
 							it->SetAccumulatedAge(it->GetAccumulatedAge() + ageIncrease);
 							int ageTypesNum = static_cast<int>(EAgeType::MAX);
 
-							std::vector<float> curtainGrowthCoeffs(ageTypesNum, 0);
-
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::se)] = 25.0f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::p)] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::j)] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::im)] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::v)] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::g1)] = 0.1f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::g2)] = 0.1f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::g3)] = 0.1f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::ss)] = 0.2f;
-							curtainGrowthCoeffs[static_cast<int>(EAgeType::s)] = 0.2f;
-
-							//float currentDiameter = it->GetDiameter();
 							float currentRadius = it->GetRadius();
 
 							bool bPlantsRepulsion = false;
@@ -813,7 +1096,10 @@ int main(void)
 								const std::vector<float> plant1Center = plant1.GetCenter();
 								const std::vector<float> plant2Center = plant2.GetCenter();
 
-								float distance =  sqrt(pow((plant2Center[0] - plant1Center[0]), 2) + pow((plant2Center[1] - plant1Center[1]), 2)) - 0.5f * 0.5f * plant2.GetDiameter() - 0.5f * 0.5f * plant1.GetDiameter();
+								float distance =  sqrt(pow((plant2Center[0] - plant1Center[0]), 2) +
+									pow((plant2Center[1] - plant1Center[1]), 2)) - 0.5f * 0.5f *
+									plant2.GetDiameter() - 0.5f * 0.5f * plant1.GetDiameter();
+
 								std::cout << "Distance between plants (d): " << distance << std::endl;
 								std::cout << "1/(d^2) = " << (1.0f / distance) << std::endl;
 
@@ -821,13 +1107,13 @@ int main(void)
 							};
 
 							float curtainGrowthIncrease;
-							const float plantsRepulseDistance = 0.1f;
 							float maxAvailableCurtainIncrease = 0.0f;
 
 							for (int i = 0; i < plants.size(); ++i)
 							{
 
-								if (i != index && calcDistanceBetweenPlants(*it, plants[i]) < plantsRepulseDistance)
+								if (i != index && calcDistanceBetweenPlants(*it, plants[i]) <
+									plantsRepulseDistance)
 								{
 									bPlantsRepulsion = true;
 									it->SetDieOnNextAge(true);
@@ -841,7 +1127,8 @@ int main(void)
 							}
 							else
 							{
-								curtainGrowthIncrease = currentRadius * curtainGrowthCoeffs[static_cast<int>(prevAgeType) - 1];
+								curtainGrowthIncrease = currentRadius *
+									curtainGrowthCoeffs[static_cast<int>(prevAgeType)];
 							}
 
 							it->SetRadius(currentRadius + curtainGrowthIncrease);
@@ -853,12 +1140,17 @@ int main(void)
 					}
 				}
 
-				std::sort(plantsToDeleteIdx.begin(), plantsToDeleteIdx.end(), [](int a, int b) {return a > b; });
+				std::sort(plantsToDeleteIdx.begin(), plantsToDeleteIdx.end(), [](int a, int b)
+				{
+					return a > b;
+				});
 
-				for (std::vector<int>::iterator i = plantsToDeleteIdx.begin(); i != plantsToDeleteIdx.end(); ++i)
+				for (std::vector<int>::iterator i = plantsToDeleteIdx.begin();
+					i != plantsToDeleteIdx.end(); ++i)
 				{
 					std::cout << "Vector size = " << plants.size() << std::endl;
 					std::cout << "Will delete element with index " << *i << std::endl;
+
 					plants.erase(plants.begin() + *i);
 				}
 
