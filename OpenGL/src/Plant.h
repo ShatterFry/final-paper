@@ -26,7 +26,6 @@ class Plant
 public:
 	Plant();
 	Plant(const int id, const std::vector<float>& center, const float radius, const EAgeType ageType);
-	//Plant(Plant&& other);
 
 	std::vector<float> GetCenter() const;
 
@@ -50,6 +49,8 @@ public:
 	void SetDieOnNextAge(bool inDieOnNextAge) { bDieOnNextAge = inDieOnNextAge; }
 
 	void SetData(const FPlantData& data);
+
+	int GetId() const { return mId; }
 
 private:
 	int mId;

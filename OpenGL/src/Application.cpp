@@ -526,6 +526,11 @@ float CalcEcoNiche(const std::vector<int>& specieIds,
 	return realisedEcoNiche;
 }
 
+void OnGlfwError(int id, const char* description)
+{
+	std::cout << description << std::endl;
+}
+
 int main(void)
 {
 	AgeTypesTable ageTypesTable;
@@ -567,17 +572,6 @@ int main(void)
 	const char* listBoxItems[3] = {"Apple", "Banana", "Cherry"};
 	int currentListBoxItem = 0;
 
-	sqlite3* dataBase;
-
-	char* sqlErrorMsg = nullptr;
-
-	if (sqlite3_open("myDataBase.dblite", &dataBase))
-	{
-		std::cout << "Can't create/open database: " << sqlite3_errmsg(dataBase) << std::endl;
-		sqlite3_close(dataBase);
-		return 0;
-	}
-
 	auto printTableData = [](void* firstArg, int colNum, char** colValues, char** colNames)
 	{
 	    std::cout << "Print Table Data" << std::endl;
@@ -594,16 +588,8 @@ int main(void)
 		return 0;
 	};
 
-
-	auto dropTable = [&](const std::string& inTableName)
-	{
-		std::string sqlStm("DROP TABLE IF EXISTS " + inTableName + ";");
-		ExecuteSql(dataBase, sqlStm.c_str(), nullptr, nullptr, &sqlErrorMsg);
-	};
-
-	dropTable(plants_TableName);
-	dropTable(ageTypes_TableName);
-	dropTable(ecoScales_TableName);
+	appMgr->OpenDB("myDataBase");
+	appMgr->DropTables({ plants_TableName, ageTypes_TableName, ecoScales_TableName });
 
 	CreateTable(dataBase, plants_TableName);
 	CreateTable(dataBase, ageTypes_TableName);
@@ -708,7 +694,9 @@ int main(void)
 		SelectAllTableData(dataBase, ecoScales_TableName, tableRowSelectCallback, &customCallback);
 	}
 
-	GLFWwindow *window;
+	GLFWwindow* window;
+
+	glfwSetErrorCallback(&OnGlfwError);
 
 	// Initialize the library
 	if (!glfwInit())
@@ -717,9 +705,9 @@ int main(void)
 		return -1;
 	}
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window = glfwCreateWindow(960, 540, "Modelling", NULL, NULL);
 
@@ -735,12 +723,12 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
+	std::cout << glGetString(GL_VERSION) << std::endl;
+
 	if (glewInit() != GLEW_OK)
 	{
 		std::cout << "Error!" << std::endl;
 	}
-
-	std::cout << glGetString(GL_VERSION) << std::endl;
 
 	{
 		std::shared_ptr<std::vector<float>> positions = std::make_shared<std::vector<float>>();
@@ -836,7 +824,7 @@ int main(void)
 		curtainGrowthCoeffs[static_cast<int>(EAgeType::s)] = 0.2f;
 
 		bool bProduceChildren = true;
-		bool show_another_window = false;
+		bool show_another_window = true;
 		float plantsRepulseDistance = 0.1f;
 
 		while (!glfwWindowShouldClose(window))
@@ -853,8 +841,8 @@ int main(void)
 				shader->Bind();
 				shader->SetUniformMat4f("u_MVP", mvp);
 				shader->SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-				//EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 
+				//EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 				//renderer.Draw(va, ib, shader, drawType);
 			}
 
@@ -864,8 +852,8 @@ int main(void)
 				shader->Bind();
 				shader->SetUniformMat4f("u_MVP", mvp);
 				shader->SetUniform4f("u_Color", r, 0.3f, 0.8f, 1.0f);
-				//EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 
+				//EDrawTypes drawType = EDrawTypes::EDT_TRIANGLES;
 				//renderer.Draw(va, ib, shader, drawType);
 			}
 
@@ -959,11 +947,11 @@ int main(void)
 				ImGui::InputFloat("SS", &curtainGrowthCoeffs[static_cast<int>(EAgeType::ss)]);
 				ImGui::InputFloat("S", &curtainGrowthCoeffs[static_cast<int>(EAgeType::s)]);
 
-				//ImGui::InputText("Input text", testStr0, testStrLength);
+				ImGui::InputText("Input text", testStr0, testStrLength);
 
-				//ImGui::Combo("Combo", &currentComboItem, comboItems, 5);
+				ImGui::Combo("Combo", &currentComboItem, comboItems, 5);
 
-				/*if (ImGui::BeginCombo("Combo 2", currentComboItem2))
+				if (ImGui::BeginCombo("Combo 2", currentComboItem2))
 				{
 					for (int i = 0; i < 3; ++i)
 					{
@@ -981,11 +969,71 @@ int main(void)
 					}
 
 					ImGui::EndCombo();
-				}*/
+				}
 
-				//ImGui::Selectable("1. I am selectable", &selection[0]);
+				ImGui::Selectable("1. I am selectable", &selection[0]);
 
-				//ImGui::ListBox("ListBox", &currentListBoxItem, listBoxItems, 3);
+				ImGui::ListBox("ListBox", &currentListBoxItem, listBoxItems, 3);
+
+				const int multilineTextCharsPerRow = 10;
+				const int multilineTextRowsNum = 50;
+				const int multilineTextCharsNum = multilineTextCharsPerRow * multilineTextRowsNum;
+				const ImVec2 multilineTextSize(-1.0f, ImGui::GetTextLineHeight() * multilineTextRowsNum);
+				char multilineText[multilineTextCharsNum] =
+					"5.0	10.0\n"
+					"15.25\t16.27\n"
+					"25.10	45.11\n";
+				ImGui::InputTextMultiline("Coordinates", multilineText,
+					multilineTextCharsNum * sizeof(char));
+
+				if (ImGui::Button("Parse"))
+				{
+					std::cout << "Parsing Numbers!" << std::endl;
+
+					int lineBegin = 0;
+					int firstNumSeparator = 0;
+					int lineEnd = 0;
+					int i = 0;
+					std::string firstNumStr;
+					std::string secondNumStr;
+					float firstNum = 0.0f;
+					float secondNum = 0.0f;
+
+					while (lineBegin < multilineTextCharsNum && lineEnd < multilineTextCharsNum
+						&& i< multilineTextCharsNum)
+					{
+						if (multilineText[i] == '\t')
+						{
+							firstNumSeparator = i;
+						}
+
+						if (multilineText[i] == '\n')
+						{
+							lineEnd = i;
+
+							for (int j = lineBegin; j < firstNumSeparator; ++j)
+							{
+								firstNumStr += multilineText[j];
+							}
+							firstNum = atof(firstNumStr.c_str());
+							std::cout << "First Num = " << firstNum << std::endl;
+
+							for (int j = firstNumSeparator + 1; j < lineEnd; ++j)
+							{
+								secondNumStr += multilineText[j];
+							}
+							secondNum = atof(secondNumStr.c_str());
+							std::cout << "Second Num = " << secondNum << std::endl;
+
+							lineBegin = lineEnd + 1;
+							lineEnd = lineBegin;
+							firstNumStr = "";
+							secondNumStr = "";
+						}
+
+						++i;
+					}
+				}
 			}
 
 			if (show_another_window)
@@ -1040,7 +1088,7 @@ int main(void)
 
 						float seRadius = 0.005f;
 
-						Plant childPlant(halocnemumId, { childX, childY, childZ }, seRadius,
+						Plant childPlant(it->GetId(), { childX, childY, childZ }, seRadius,
 							EAgeType::se);
 
 						URectangle boundingRectangle = grid->GetBoundingRectangle();

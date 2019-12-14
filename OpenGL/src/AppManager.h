@@ -6,6 +6,7 @@
 #include "AgeTypeDataEntry.h"
 #include "EcoScaleDataEntry.h"
 #include "AgeTypeData.h"
+#include "vendor/sqlite/sqlite3.h"
 
 enum class EDataSource { YAML, SQLITE, MAX };
 
@@ -19,6 +20,15 @@ public:
 	void SetDataSource(EDataSource inSource) { mDataSource = inSource; }
 
 	void SyncExternalData();
+
+	int OpenDB(const std::string& dbName);
+
+	int ExecuteSqlStatement(const std::string& inSqlStatement, int(*inCallback)(void*, int, char**, char**), void* inCallbackFirstArg);
+
+	int DropTable(const std::string& inTableName);
+	int DropTables(const std::vector<std::string>& inTableNames);
+
+    int CreateTable(const std::string& inTableName);
 
 private:
 	std::vector<AgeTypeData> mAgeTypeData;
@@ -35,4 +45,6 @@ private:
 	void SyncExternalDataFromYAML();
 
 	EDataSource mDataSource = EDataSource::MAX;
+
+	sqlite3* mDatabaseInstance;
 };

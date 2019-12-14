@@ -4,6 +4,7 @@
 #include <fstream>
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 const std::string startDocumentTag = "---";
 const std::string endDocumentTag = "...";
@@ -390,4 +391,62 @@ void AppManager::SyncExternalDataFromYAML()
 
 		outFile << "..." << std::endl;
 	}*/
+}
+
+int AppManager::OpenDB(const std::string& dbName)
+{
+	std::string fullDatabaseName = dbName + ".dblite";
+
+	int result = sqlite3_open(fullDatabaseName.c_str(), &mDatabaseInstance);
+
+	if (result != SQLITE_OK)
+	{
+		std::cout << "Can't create/open database: " << sqlite3_errmsg(mDatabaseInstance) << std::endl;
+		sqlite3_close(mDatabaseInstance);
+	}
+
+	return result;
+}
+
+int AppManager::ExecuteSqlStatement(const std::string& inSqlStatement, int(*inCallback)(void*, int, char**, char**), void* inCallbackFirstArg)
+{
+	char* errorMessage;
+
+	int result = sqlite3_exec(mDatabaseInstance, inSqlStatement.c_str(), inCallback, inCallbackFirstArg, &errorMessage);
+
+	if (result != SQLITE_OK)
+	{
+		std::cout << "SQL error: " << errorMessage << std::endl;
+		sqlite3_free(errorMessage);
+	}
+
+	return result;
+}
+
+int AppManager::DropTable(const std::string& inTableName)
+{
+	std::string sqlStatement("DROP TABLE IF EXISTS " + inTableName + ";");
+	return ExecuteSqlStatement(sqlStatement.c_str(), nullptr, nullptr);
+}
+
+int AppManager::DropTables(const std::vector<std::string>& inTableNames)
+{
+	int result = SQLITE_OK;
+
+	for (int i = 0; i < inTableNames.size(); ++i)
+	{
+		int singleResult = DropTable(inTableNames[i]);
+
+		if (singleResult != SQLITE_OK)
+		{
+			result = singleResult;
+		}
+	}
+
+	return result;
+}
+
+int AppManager::CreateTable(const std::string& inTableName)
+{
+
 }
