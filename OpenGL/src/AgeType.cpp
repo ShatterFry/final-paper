@@ -25,6 +25,7 @@ std::string GetAgeTypeAbbrev(EAgeType inAgeType)
 	case EAgeType::s:
 		return std::string("s");
 	default:
+		return std::string("");
 		break;
 	}
 }

@@ -30,6 +30,12 @@ public:
 
     int CreateTable(const std::string& inTableName);
 
+	int InsertTestRows(const std::string& inTableName);
+
+	int SelectAllTableData(const std::string& inTableName, int(*inCallback)(void*, int, char**, char**), void* inCallbackFirstArg = nullptr);
+
+	int CloseDatabase();
+
 private:
 	std::vector<AgeTypeData> mAgeTypeData;
 	std::vector<EcoScaleData> mEcoScaleData;

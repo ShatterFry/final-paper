@@ -39,6 +39,7 @@
 #include "Grid.h"
 #include "AppManager.h"
 
+// #include "AgeType.h"
 #include "AgeTypeData.h"
 #include "AppInstance.h"
 
@@ -591,21 +592,21 @@ int main(void)
 	appMgr->OpenDB("myDataBase");
 	appMgr->DropTables({ plants_TableName, ageTypes_TableName, ecoScales_TableName });
 
-	CreateTable(dataBase, plants_TableName);
-	CreateTable(dataBase, ageTypes_TableName);
-	CreateTable(dataBase, ecoScales_TableName);
+	appMgr->CreateTable(plants_TableName);
+	appMgr->CreateTable(ageTypes_TableName);
+	appMgr->CreateTable(ecoScales_TableName);
 
-	InsertTestRows(dataBase, plants_TableName);
-	InsertTestRows(dataBase, ageTypes_TableName);
-	InsertTestRows(dataBase, ecoScales_TableName);
+	appMgr->InsertTestRows(plants_TableName);
+	appMgr->InsertTestRows(ageTypes_TableName);
+	appMgr->InsertTestRows(ecoScales_TableName);
 
 	std::map<int, FPlantsTableRow> plantsTableRows;
 	std::map<int, FAgeTypesTableRowData> ageTypesRows;
 	std::map<int, FEcoScaleTableRowData> ecoScalesTableRows;
 
-	SelectAllTableData(dataBase, plants_TableName, printTableData);
-	SelectAllTableData(dataBase, ageTypes_TableName, printTableData);
-	SelectAllTableData(dataBase, ecoScales_TableName, printTableData);
+	appMgr->SelectAllTableData(plants_TableName, printTableData);
+	appMgr->SelectAllTableData(ageTypes_TableName, printTableData);
+	appMgr->SelectAllTableData(ecoScales_TableName, printTableData);
 
 	auto getPlantsTableData = [](void* firstArg, int num, char** colValue, char** colName)
 	{
@@ -626,7 +627,7 @@ int main(void)
 		plantsTableRows.emplace(pair);
 	};
 
-	SelectAllTableData(dataBase, plants_TableName, getPlantsTableData, &savePlantsTableRow);
+	appMgr->SelectAllTableData(plants_TableName, getPlantsTableData, &savePlantsTableRow);
 
 	auto getAgeTypesTableRow = [](void* firstArg, int colNum, char** colValue, char** colName)
 	{
@@ -658,7 +659,7 @@ int main(void)
 		ageTypesRows.emplace(pair);
 	};
 
-	SelectAllTableData(dataBase, ageTypes_TableName, getAgeTypesTableRow, &saveAgeTypesTableRowData);
+	appMgr->SelectAllTableData(ageTypes_TableName, getAgeTypesTableRow, &saveAgeTypesTableRowData);
 
 	{
 		auto tableRowSelectCallback = [](void* firstArg, int colNum, char** colValue, char** colName)
@@ -691,7 +692,7 @@ int main(void)
 			ecoScalesTableRows.emplace(entry);
 		};
 
-		SelectAllTableData(dataBase, ecoScales_TableName, tableRowSelectCallback, &customCallback);
+		appMgr->SelectAllTableData(ecoScales_TableName, tableRowSelectCallback, &customCallback);
 	}
 
 	GLFWwindow* window;
@@ -1240,7 +1241,8 @@ int main(void)
 	ImGui::DestroyContext();
 	glfwTerminate();
 
-	sqlite3_close(dataBase);
+	//sqlite3_close(dataBase);
+	appMgr->CloseDatabase();
 
 	return 0;
 }

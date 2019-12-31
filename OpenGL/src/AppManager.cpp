@@ -439,7 +439,7 @@ int AppManager::DropTables(const std::vector<std::string>& inTableNames)
 
 		if (singleResult != SQLITE_OK)
 		{
-			result = singleResult;
+			return singleResult;
 		}
 	}
 
@@ -448,5 +448,23 @@ int AppManager::DropTables(const std::vector<std::string>& inTableNames)
 
 int AppManager::CreateTable(const std::string& inTableName)
 {
+	assert(false);
+	return SQLITE_ERROR;
+}
 
+int AppManager::InsertTestRows(const std::string& inTableName)
+{
+	assert(false);
+	return SQLITE_ERROR;
+}
+
+int AppManager::SelectAllTableData(const std::string& inTableName, int(*inCallback)(void*, int, char**, char**), void* inCallbackFirstArg)
+{
+	assert(false);
+	return SQLITE_ERROR;
+}
+
+int AppManager::CloseDatabase()
+{
+	sqlite3_close(mDatabaseInstance);
 }
