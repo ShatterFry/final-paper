@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <cassert>
 
 const std::string startDocumentTag = "---";
 const std::string endDocumentTag = "...";
