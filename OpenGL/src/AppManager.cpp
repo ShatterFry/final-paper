@@ -5,7 +5,12 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <map>
+
 #include <cassert>
+
+#include "GlobalAppDefines.h"
+#include "GlobalAppStructs.h"
 
 const std::string startDocumentTag = "---";
 const std::string endDocumentTag = "...";
@@ -17,6 +22,46 @@ const std::string ageTypeIdTag = "age-type-id";
 std::string minAgeTag = "min-age";
 std::string maxAgeTag = "max-age";
 std::string charactersToTrim = {' ', ':'};
+
+std::string ecoScalesTable_ColumnType("int");
+
+std::string rowid_ColumnName("rowid");
+
+std::string plantName_ColumnName("plantName");
+std::string plantName_ColumnType("varchar(50)");
+
+std::string ageBoundaryColumnType("int");
+
+std::string se_Min_ColumnName("seMin");
+std::string se_Max_ColumnName("seMax");
+
+std::string p_Min_ColumnName("pMin");
+std::string p_Max_ColumnName("pMax");
+
+std::string j_Min_ColumnName("jMin");
+std::string j_Max_ColumnName("jMax");
+
+std::string im_Min_ColumnName("imMin");
+std::string im_Max_ColumnName("imMax");
+
+std::string v_Min_ColumnName("vMin");
+std::string v_Max_ColumnName("vMax");
+
+std::string g1_Min_ColumnName("g1Min");
+std::string g1_Max_ColumnName("g1Max");
+
+std::string g2_Min_ColumnName("g2Min");
+std::string g2_Max_ColumnName("g2Max");
+
+std::string g3_Min_ColumnName("g3Min");
+std::string g3_Max_ColumnName("g3Max");
+
+std::string ss_Min_ColumnNane("ssMin");
+std::string ss_Max_ColumnName("ssMax");
+
+std::string s_Min_ColumnName("sMin");
+std::string s_Max_ColumnName("sMax");
+
 
 AppManager* AppManager::mInstance;
 
@@ -449,23 +494,346 @@ int AppManager::DropTables(const std::vector<std::string>& inTableNames)
 
 int AppManager::CreateTable(const std::string& inTableName)
 {
-	assert(false);
-	return SQLITE_ERROR;
+	std::cout << "AppManager::CreateTable" << std::endl;
+
+	std::string sqlStatement;
+	char* sqlErrorMessage;
+
+	if (inTableName == plants_TableName)
+	{
+		sqlStatement = std::string( "CREATE TABLE IF NOT EXISTS " + plants_TableName + "(" +
+			plantName_ColumnName + " " +
+			plantName_ColumnType + ");" );
+	}
+	else if (inTableName == ageTypes_TableName)
+	{
+		sqlStatement = std::string("CREATE TABLE IF NOT EXISTS " + ageTypes_TableName + "(");
+
+		for (int i = 0; i < static_cast<int>(EAgeType::MAX); ++i)
+		{
+			EAgeType ageType = static_cast<EAgeType>(i);
+			const std::string& ageTypeAbbrev = GetAgeTypeAbbrev(static_cast<EAgeType>(i));
+
+			sqlStatement += ageTypeAbbrev + std::string("Min ");
+			sqlStatement += ageBoundaryColumnType;
+			sqlStatement += std::string(", ");
+
+			sqlStatement += ageTypeAbbrev + std::string("Max ");
+			sqlStatement += ageBoundaryColumnType;
+			if ( ageType != static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1) )
+			{
+				sqlStatement += std::string(", ");
+			}
+		}
+
+		sqlStatement += ");";
+	}
+	else if (inTableName == ecoScales_TableName)
+	{
+		sqlStatement = std::string("CREATE TABLE IF NOT EXISTS " + ecoScales_TableName + "(");
+
+		for (int i = 0; i < static_cast<int>(EEcoScaleType::MAX); ++i)
+		{
+			EEcoScaleType type = static_cast<EEcoScaleType>(i);
+			const std::string typeAbbrev = GetEcoScaleAbbreviation(type);
+
+			sqlStatement += (typeAbbrev + "Min ");
+			sqlStatement += ecoScalesTable_ColumnType + ", ";
+
+			sqlStatement += (typeAbbrev + "Max ");
+			sqlStatement += ecoScalesTable_ColumnType;
+
+			if (i != (static_cast<int>(EEcoScaleType::MAX) - 1))
+			{
+				sqlStatement += ", ";
+			}
+		}
+
+		sqlStatement += std::string(");");
+	}
+
+	return ExecuteSqlStatement(sqlStatement.c_str(), nullptr, nullptr);
 }
 
 int AppManager::InsertTestRows(const std::string& inTableName)
 {
-	assert(false);
-	return SQLITE_ERROR;
+	std::cout << "AppManager::InsertTestRows" << std::endl;
+
+	std::string sqlStatement;
+	char* errorMessage;
+
+	if (inTableName == plants_TableName)
+	{
+		std::map<int, FPlantsTableRow> rowsToInsert;
+
+		FPlantsTableRow row1;
+		row1.PlantName = std::string("Halocnemum strobilaceum (Pall.) M.Bieb.");
+		rowsToInsert.emplace(1, row1);
+
+		FPlantsTableRow row2;
+		row2.PlantName = std::string("Suaeda maritima (L.) Dumort.");
+		rowsToInsert.emplace(2, row2);
+
+		FPlantsTableRow row3;
+		row3.PlantName = std::string("Eremopyrum orientale (L.) Jaub. & Spach");
+		rowsToInsert.emplace(3, row3);
+
+		for (const std::pair<int, FPlantsTableRow> elem : rowsToInsert)
+		{
+			sqlStatement += std::string("INSERT INTO " + plants_TableName + "(" +
+				rowid_ColumnName + ", " + plantName_ColumnName +
+				") VALUES(" + std::to_string(elem.first) + ", " + "'" +
+				elem.second.PlantName + "'" + ");");
+		}
+	}
+	else if (inTableName == ageTypes_TableName)
+	{
+		for (int i = 1; i < 4; ++i)
+		{
+			sqlStatement += std::string("INSERT INTO " + ageTypes_TableName + "(" + rowid_ColumnName + ", ");
+
+			for (int j = 0; j < static_cast<int>(EAgeType::MAX); ++j)
+			{
+				EAgeType ageType = static_cast<EAgeType>(j);
+				std::string ageTypeAbbrev = GetAgeTypeAbbrev(ageType);
+
+				sqlStatement += (ageTypeAbbrev + std::string("Min, "));
+				sqlStatement += (ageTypeAbbrev + std::string("Max"));
+
+				if ( ageType != static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1) )
+				{
+					sqlStatement += ", ";
+				}
+			}
+
+			sqlStatement += (std::string(") VALUES(") + std::to_string(i) + ", ");
+
+			for (int j = 0; j < static_cast<int>(EAgeType::MAX); ++j)
+			{
+				int minAge = 6;
+				int maxAge = 9;
+
+				EAgeType ageType = static_cast<EAgeType>(j);
+
+				switch (ageType)
+				{
+					case EAgeType::se:
+						minAge = 1;
+						maxAge = 1;
+						break;
+					case EAgeType::p:
+						minAge = 1;
+						maxAge = 1;
+						break;
+					case EAgeType::j:
+						minAge = 1;
+						maxAge = 1;
+						break;
+					case EAgeType::im:
+						minAge = 1;
+						maxAge = 3;
+						break;
+					case EAgeType::v:
+						minAge = 1;
+						maxAge = 5;
+						break;
+					case EAgeType::g1:
+						minAge = 1;
+						maxAge = 4;
+						break;
+					case EAgeType::g2:
+						minAge = 5;
+						maxAge = 5;
+						break;
+					case EAgeType::g3:
+						minAge = 1;
+						maxAge = 2;
+						break;
+					case EAgeType::ss:
+						minAge = 1;
+						maxAge = 2;
+						break;
+					case EAgeType::s:
+						minAge = 1;
+						maxAge = 2;
+						break;
+					default:
+						minAge = 0;
+						maxAge = 0;
+						break;
+				}
+
+				sqlStatement += ( std::to_string(minAge) + ", " + std::to_string(maxAge) );
+
+				if (ageType != static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1))
+				{
+					sqlStatement += ", ";
+				}
+			}
+
+			sqlStatement += ");";
+		}
+	}
+	else if (inTableName == ecoScales_TableName)
+	{
+		std::vector<int> halocnemumEcoScales =
+		{
+			1, 7, // OM
+			1, 13, // HD
+			10, 19, // TR
+			9, 13, // RC
+			1, 3 // LC
+		};
+
+		std::vector<int> suaedaEcoScales = 
+		{
+			5, 11, // OM
+			2, 18, // HD
+			10, 18, // TR
+			5, 13, // RC
+			1, 4 // LC
+		};
+
+		std::vector<int> eremopyrumEcoScales = 
+		{
+			2, 8, // OM
+			1, 8, // HD
+			7, 16, // TR
+			0, 0, // RC
+			1, 3 // LC
+		};
+
+		std::vector<std::vector<int>> speciesEcoScales = {halocnemumEcoScales, suaedaEcoScales,
+			eremopyrumEcoScales};
+
+		for (int i = 1; i < 4; ++i)
+		{
+			sqlStatement += std::string("INSERT INTO " + ecoScales_TableName + "(" + rowid_ColumnName +
+				", ");
+
+			for (int j = 0; j < static_cast<int>(EEcoScaleType::MAX); ++j)
+			{
+				EEcoScaleType type = static_cast<EEcoScaleType>(j);
+
+				const std::string typeAbbrev = GetEcoScaleAbbreviation(type);
+
+				sqlStatement += typeAbbrev + "Min, ";
+				sqlStatement += typeAbbrev + "Max";
+
+				if (j != (static_cast<int>(EEcoScaleType::MAX) - 1))
+				{
+					sqlStatement += ", ";
+				}
+			}
+
+			sqlStatement += ") VALUES(" + std::to_string(i) + ", ";
+
+			for (int j = 0; j < static_cast<int>(EEcoScaleType::MAX) * 2; j += 2)
+			{
+				EEcoScaleType ecoScaleType = static_cast<EEcoScaleType>(j / 2);
+
+				int minValue = speciesEcoScales[i - 1][j];
+				int maxValue = speciesEcoScales[i - 1][j + 1];
+
+				/*switch (ecoScaleType)
+				{
+				case EEcoScaleType::OM:
+					minValue = 1;
+					maxValue = 7;
+					break;
+				case EEcoScaleType::HD:
+					minValue = 1;
+					maxValue = 13;
+					break;
+				case EEcoScaleType::TR:
+					minValue = 10;
+					maxValue = 19;
+					break;
+				case EEcoScaleType::RC:
+					minValue = 9;
+					maxValue = 13;
+					break;
+				case EEcoScaleType::LC:
+					minValue = 1;
+					maxValue = 3;
+					break;
+				default:
+					break;
+				}*/
+
+				sqlStatement += std::to_string(minValue) + ", " + std::to_string(maxValue);
+
+				if (j != (static_cast<int>(EEcoScaleType::MAX) * 2 - 2))
+				{
+					sqlStatement += ", ";
+				}
+			}
+
+			sqlStatement += ");";
+		}
+	}
+
+	return ExecuteSqlStatement(sqlStatement.c_str(), nullptr, nullptr);
 }
 
 int AppManager::SelectAllTableData(const std::string& inTableName, int(*inCallback)(void*, int, char**, char**), void* inCallbackFirstArg)
 {
-	assert(false);
-	return SQLITE_ERROR;
+	std::cout << "AppManager::SelectAllTableData" << std::endl;
+
+	std::string sqlStatement;
+	char* sqlErrorMsg;
+
+	if (inTableName == plants_TableName)
+	{
+		sqlStatement = std::string("SELECT " + rowid_ColumnName + ", " + plantName_ColumnName +
+			" FROM " + plants_TableName + ";");
+	}
+	else if (inTableName == ageTypes_TableName)
+	{
+		sqlStatement = std::string("SELECT " + rowid_ColumnName + ", ");
+
+		for (int i = 0; i < static_cast<int>(EAgeType::MAX); ++i)
+		{
+			EAgeType ageType = static_cast<EAgeType>(i);
+			sqlStatement += GetAgeTypeAbbrev(ageType) + "Min, ";
+
+			if ( ageType == static_cast<EAgeType>(static_cast<int>(EAgeType::MAX) - 1) )
+			{
+				sqlStatement += GetAgeTypeAbbrev(ageType) + "Max ";
+			}
+			else
+			{
+				sqlStatement += GetAgeTypeAbbrev(ageType) + "Max, ";
+			}
+		}
+
+		sqlStatement += "FROM " + ageTypes_TableName + ";";
+	}
+	else if (inTableName == ecoScales_TableName)
+	{
+		sqlStatement += "SELECT " + rowid_ColumnName + ", ";
+
+		for (int i = 0; i < static_cast<int>(EEcoScaleType::MAX); ++i)
+		{
+			EEcoScaleType type = static_cast<EEcoScaleType>(i);
+			const std::string typeAbbrev = GetEcoScaleAbbreviation(type);
+
+			sqlStatement += typeAbbrev + "Min, ";
+			sqlStatement += typeAbbrev + "Max";
+
+			if ( i != (static_cast<int>(EEcoScaleType::MAX) - 1) )
+			{
+				sqlStatement += ", ";
+			}
+		}
+
+		sqlStatement += " FROM " + ecoScales_TableName + ";";
+	}
+
+	return ExecuteSqlStatement(sqlStatement.c_str(), inCallback, inCallbackFirstArg);
 }
 
 int AppManager::CloseDatabase()
 {
-	sqlite3_close(mDatabaseInstance);
+	return sqlite3_close(mDatabaseInstance);
 }
