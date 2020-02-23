@@ -306,9 +306,9 @@ int main(void)
 		return -1;
 	}
 
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window = glfwCreateWindow(960, 540, "Modelling", NULL, NULL);
 
@@ -375,7 +375,7 @@ int main(void)
 		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
 		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
-		std::shared_ptr<Shader> shader = std::make_shared<Shader>("res/shaders/Basic.shader");
+		std::shared_ptr<Shader> shader = std::make_shared<Shader>("../../OpenGL/res/shaders/Basic.shader");
 		shader->Bind();
 		shader->SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 

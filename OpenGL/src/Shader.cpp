@@ -10,6 +10,8 @@
 Shader::Shader(const std::string& filepath)
 	: m_FilePath(filepath), m_RendererID(0)
 {
+    std::cout << "Shader::Shader" << std::endl;
+
 	ShaderProgramSource source = ParseShader(filepath);
 	m_RendererID = CreateShader(source.VertexSource, source.FragmentSource);
 }
@@ -25,7 +27,18 @@ Shader::~Shader()
 
 ShaderProgramSource Shader::ParseShader(const std::string& filepath)
 {
+    std::cout << "Shader::ParseShader" << std::endl;
+
 	std::ifstream stream(filepath);
+
+    if(!stream.is_open())
+    {
+        std::cout << "Failed to open shader file " << filepath << std::endl;
+    }
+    else
+    {
+        std::cout << "Successfully opened shader file " << filepath << std::endl;
+    }
 
 	enum class ShaderType {
 		NONE = -1,
@@ -59,6 +72,8 @@ unsigned int Shader::CompileShader(
 	const std::string& source
 )
 {
+    std::cout << "Shader::CompileShader" << std::endl;
+
     unsigned int id = 0;
     {
         FFunctionCallback funcCB = [&]()
@@ -144,6 +159,8 @@ unsigned int Shader::CreateShader(
 	const std::string& fragmentShader
 )
 {
+    std::cout << "Shader::CreateShader" << std::endl;
+
     unsigned int program = 0;
     {
         FFunctionCallback funcCB = [&]()
