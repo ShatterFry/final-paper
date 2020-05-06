@@ -96,6 +96,9 @@
     <ClCompile Include="src\EcoScaleType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\OpenGLSettings.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\Plant.h">
@@ -215,11 +218,15 @@
     <ClInclude Include="src\GlobalAppStructs.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\OpenGLSettings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="res\shaders\Basic.shader" />
     <None Include="data.yaml" />
     <None Include="imgui.ini" />
     <None Include="myDataBase.dblite" />
+    <None Include="res\shaders\Basic_310.shader" />
   </ItemGroup>
 </Project>

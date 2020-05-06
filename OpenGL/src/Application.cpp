@@ -58,6 +58,9 @@
 #include "GlobalAppStructs.h"
 #include "GlobalAppDefines.h"
 
+//#include <filesystem>
+#include "OpenGLSettings.h"
+
 void FillOutPlantsData(std::vector<Plant>& plants, int plantId);
 void ScaleToReal(std::vector<Plant>& inPlants, const float scale);
 
@@ -306,9 +309,9 @@ int main(void)
 		return -1;
 	}
 
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	//glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	//glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	window = glfwCreateWindow(960, 540, "Modelling", NULL, NULL);
 
@@ -324,7 +327,12 @@ int main(void)
 	glfwMakeContextCurrent(window);
 	glfwSwapInterval(1);
 
-	std::cout << glGetString(GL_VERSION) << std::endl;
+	const char* glVersion = (char*)glGetString(GL_VERSION);
+	const std::string glVersionStr = glVersion;
+	std::cout << "GL_VERSION: " << glVersionStr << std::endl;
+
+	const std::string openglTargetVersionStr = "3.1.0";
+	OpenGLSettings::SetVersionString(openglTargetVersionStr);
 
 	if (glewInit() != GLEW_OK)
 	{
@@ -375,7 +383,25 @@ int main(void)
 		glm::mat4 proj = glm::ortho(0.0f, 960.0f, 0.0f, 540.0f, -1.0f, 1.0f);
 		glm::mat4 view = glm::translate(glm::mat4(1.0f), glm::vec3(0, 0, 0));
 
-		std::shared_ptr<Shader> shader = std::make_shared<Shader>("../../OpenGL/res/shaders/Basic.shader");
+		const char* glShadingLanguageVersion = (char*)glGetString(GL_SHADING_LANGUAGE_VERSION);
+		const std::string glShadingLanguageVersionStr = glShadingLanguageVersion;
+		std::cout << "GL_SHADING_LANGUAGE_VERSION: " << glShadingLanguageVersionStr << std::endl;
+		const std::string targetSLVersion = "1.40";
+		OpenGLSettings::SetSLVersionString(targetSLVersion);
+
+		const int versionMajor = OpenGLSettings::GetMajorVersion();
+		const int versionMinor = OpenGLSettings::GetMinorVersion();
+
+		std::string shaderFileName = "Basic.shader";
+		if (versionMajor <= 3 && versionMinor < 3)
+		{
+			shaderFileName = "Basic_310.shader";
+		}
+		std::string shaderPath = "res/shaders/" + shaderFileName;
+#ifdef PLATFORM_LINUX
+		shaderPath = "../../OpenGL/res/shaders/" + shaderFileName;
+#endif
+		std::shared_ptr<Shader> shader = std::make_shared<Shader>(shaderPath);
 		shader->Bind();
 		shader->SetUniform4f("u_Color", 0.8f, 0.3f, 0.8f, 1.0f);
 

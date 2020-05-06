@@ -161,6 +161,7 @@
     <ClCompile Include="src\Grid.cpp" />
     <ClCompile Include="src\IndexBuffer.cpp" />
     <ClCompile Include="src\Line.cpp" />
+    <ClCompile Include="src\OpenGLSettings.cpp" />
     <ClCompile Include="src\Plant.cpp" />
     <ClCompile Include="src\Point.cpp" />
     <ClCompile Include="src\Rectangle.cpp" />
@@ -196,6 +197,7 @@
     <ClInclude Include="src\GlobalAppEnums.h" />
     <ClInclude Include="src\GlobalAppStructs.h" />
     <ClInclude Include="src\Grid.h" />
+    <ClInclude Include="src\OpenGLSettings.h" />
     <ClInclude Include="src\IndexBuffer.h" />
     <ClInclude Include="src\Line.h" />
     <ClInclude Include="src\Plant.h" />
@@ -224,6 +226,7 @@
     <None Include="imgui.ini" />
     <None Include="myDataBase.dblite" />
     <None Include="res\shaders\Basic.shader" />
+    <None Include="res\shaders\Basic_310.shader" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

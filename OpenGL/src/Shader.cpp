@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "Renderer.h"
+#include "OpenGLSettings.h"
 
 Shader::Shader(const std::string& filepath)
 	: m_FilePath(filepath), m_RendererID(0)
@@ -161,6 +162,15 @@ unsigned int Shader::CreateShader(
 {
     std::cout << "Shader::CreateShader" << std::endl;
 
+    const int openglVersionMajor = OpenGLSettings::GetMajorVersion();
+    const int openglVersionMinor = OpenGLSettings::GetMinorVersion();
+    std::cout << "openglVersionMajor = " << openglVersionMajor << std::endl;
+    std::cout << "openglVersionMinor = " << openglVersionMinor << std::endl;
+    const int openglSLVersionMajor = OpenGLSettings::GetMajorSLVersion();
+    const int openglSLVersionMinor = OpenGLSettings::GetMinorSLVersion();
+    std::cout << "openglSLVersionMajor = " << openglSLVersionMajor << std::endl;
+    std::cout << "openglSLVersionMinor = " << openglSLVersionMinor << std::endl;
+
     unsigned int program = 0;
     {
         FFunctionCallback funcCB = [&]()
@@ -181,6 +191,12 @@ unsigned int Shader::CreateShader(
         GLCall(funcCB);
     }
 
+    if (openglVersionMajor <= 3 && openglVersionMinor < 3)
+    {
+        glBindAttribLocation(program, 0, "position");
+        glBindAttribLocation(program, 1, "texCoord");
+    }
+
     {
         FFunctionCallback funcCB = [&]()
         {
@@ -188,6 +204,13 @@ unsigned int Shader::CreateShader(
         };
         GLCall(funcCB);
     }
+
+    if (openglVersionMajor <= 3 && openglVersionMinor < 3)
+    {
+        glBindAttribLocation(program, 0, "color");
+    }
+
+    // TODO - glBindAttribLocation()
 
     {
         FFunctionCallback funcCB = [&]()

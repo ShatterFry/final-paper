@@ -27,7 +27,10 @@ namespace WindowsFormsApp
             g1._maxAge = 4;
 
             var plants = new List<Plant>();
-            plants.Add(new Plant(g1, 0.24243, 4.50999, (12/30/2)));
+            double gridSquareSideLength = 30;
+            double diameter = 12 / gridSquareSideLength;
+            double radius = diameter / 2;
+            plants.Add(new Plant(g1, 0.24243, 4.50999, radius));
         }
     }
 }
