@@ -25,21 +25,37 @@ namespace WindowsFormsApp
 
         private void Form1_Paint(object sender, System.Windows.Forms.PaintEventArgs pe)
         {
-            Graphics g = pe.Graphics;
-            System.Drawing.Pen myPen = new System.Drawing.Pen(System.Drawing.Color.Red);
-            System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Aquamarine);
+            if (bShouldDrawEllipse)
+            {
+                Graphics g = pe.Graphics;
+                System.Drawing.Pen myPen = new System.Drawing.Pen(System.Drawing.Color.Red);
+                System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Aquamarine);
 
-            Rectangle boundingRect = new Rectangle(0, 0, 200, 200);
-            g.DrawEllipse(myPen, boundingRect);
-            g.FillEllipse(myBrush, boundingRect);
+                Rectangle boundingRect = new Rectangle(0, 0, 200, 200);
+                g.DrawEllipse(myPen, boundingRect);
+                g.FillEllipse(myBrush, boundingRect);
 
-            myPen.Dispose();
-            g.Dispose();
+                myPen.Dispose();
+                g.Dispose();
+            }
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
+            bShouldDrawEllipse = true;
+            Invalidate();
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
 
         }
+
+        private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private bool bShouldDrawEllipse = false;
     }
 }
