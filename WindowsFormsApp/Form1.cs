@@ -32,18 +32,18 @@ namespace WindowsFormsApp
                 System.Drawing.Pen myPen = new System.Drawing.Pen(System.Drawing.Color.Red);
                 System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Aquamarine);
 
-                int rectWidth = 200;
-                int rectHeight = 200;
-                int topLeftX = 0;
-                int topLeftY = 0;
-                int maxX = topLeftX + rectWidth;
-                int maxY = topLeftY + rectHeight;
-                Rectangle boundingRect = new Rectangle(0, 0, 200, 200);
+                const int gridRectWidth = 200;
+                const int gridRectHeight = 200;
+                const int topLeftX = 0;
+                const int topLeftY = 0;
+                int maxX = topLeftX + gridRectWidth;
+                int maxY = topLeftY + gridRectHeight;
+                
                 System.Drawing.Pen rectPen = new System.Drawing.Pen(System.Drawing.Color.Chocolate);
 
                 const int gridSectionsNum = 5;
-                int gridSectionWidth = rectWidth / gridSectionsNum;
-                int gridSectionHeight = rectHeight / gridSectionsNum;
+                int gridSectionWidth = gridRectWidth / gridSectionsNum;
+                int gridSectionHeight = gridRectHeight / gridSectionsNum;
                 //Rectangle[] gridRects = new Rectangle[gridSectionsNum * gridSectionsNum];
                 List<Rectangle> gridRects = new List<Rectangle>();
                 for (int i = 0; i < gridSectionsNum; ++i)
@@ -54,8 +54,17 @@ namespace WindowsFormsApp
                     }
                 }
 
-                g.DrawEllipse(myPen, boundingRect);
-                g.FillEllipse(myBrush, boundingRect);
+                for (int i = 0; i < mPlants.Count; ++i)
+                {
+                    double boundRectX = mPlants[i].GetX() - mPlants[i].GetRadius();
+                    double boundRectY = mPlants[i].GetY() + mPlants[i].GetRadius();
+                    float plantDiameter = (float)(mPlants[i].GetRadius() * 2.0);
+                    float rectHeight = plantDiameter * (gridRectHeight / gridSectionsNum);
+                    float rectiWidth = plantDiameter * (gridRectWidth / gridSectionsNum);
+                    RectangleF boundingRect = new RectangleF((float)boundRectX, (float)boundRectY, rectHeight, rectiWidth);
+                    g.DrawEllipse(myPen, boundingRect);
+                    g.FillEllipse(myBrush, boundingRect);
+                }
 
                 //g.DrawRectangle(rectPen, boundingRect);
                 g.DrawRectangles(rectPen, gridRects.ToArray());
@@ -82,6 +91,16 @@ namespace WindowsFormsApp
 
         }
 
+        public void SetPlants(List<Plant> inPlants)
+        //public void SetPlants(Plant inPlant)
+        {
+            List<Plant> tmpPlants = new List<Plant>();
+            //mPlants = tmpPlants;
+            mPlants = inPlants;
+        }
+
         private bool bShouldDrawEllipse = false;
+        private List<Plant> mPlants = new List<Plant>();
+        //public List<Plant> mPlants = new List<Plant>();
     }
 }

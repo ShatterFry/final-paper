@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace WindowsFormsApp
 {
-    class Plant
+    public class Plant
     {
-        public AgeType _AgeType;
-        public double _X;
-        public double _Y;
-        public double _Radius;
-        public double _InitialAge;
+        //public AgeType _AgeType;
+        private AgeType _AgeType;
+        private double _X;
+        private double _Y;
+        private double _Radius;
+        private double _InitialAge;
 
         public Plant()
         {
@@ -30,6 +31,21 @@ namespace WindowsFormsApp
         ~Plant()
         {
 
+        }
+
+        public double GetX()
+        {
+            return _X;
+        }
+
+        public double GetY()
+        {
+            return _Y;
+        }
+
+        public double GetRadius()
+        {
+            return _Radius;
         }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace WindowsFormsApp
 {
-    class AgeType
+    public class AgeType
     {
         public double _minAge;
         public double _maxAge;
