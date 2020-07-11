@@ -1,41 +1,36 @@
-import string
-import time
-import win32api
-import win32con
+import sys
+import tkinter
 
-print(win32api.__file__)
-print(win32con.__file__)
-print('')
+class Application(tkinter.Frame):
+    def __init__(self, master=None):
+        super().__init__(master)
+        self.master = master
+        self.pack()
+        self.create_widgets()
 
-#win32api.keybd_event(win32con.SHIFT_PRESSED, 0, win32con.KEYEVENTF_EXTENDEDKEY,0)
+    def create_widgets(self):
+        self.hi_there = tkinter.Button(self)
+        self.hi_there["text"] = "Hello, World!\n(click me)"
+        self.hi_there["command"] = self.say_hi
+        self.hi_there.pack(side="top")
 
-#win32api.keybd_event(win32con.LEFT_CTRL_PRESSED, 0, win32con.KEYEVENTF_EXTENDEDKEY,0)
-#win32api.keybd_event(win32con.LEFT_ALT_PRESSED, 0, win32con.KEYEVENTF_EXTENDEDKEY,0)
-#win32api.keybd_event(win32con.VK_DELETE, 0, win32con.KEYEVENTF_EXTENDEDKEY,0)
+        self.quit = tkinter.Button(self, text="QUIT", bg="blue", fg="red", command=self.master.destroy)
+        self.quit.pack(side="bottom")
 
-#win32api.keybd_event(win32con.LEFT_CTRL_PRESSED, 0, 0, 0)
-#win32api.keybd_event(win32con.LEFT_ALT_PRESSED, 0, 0, 0)
-#win32api.keybd_event(win32con.VK_DELETE, 0, 0, 0)
+    def say_hi(self):
+        print("hi there, everyone!")
 
-#win32api.keybd_event(win32con.LEFT_CTRL_PRESSED | win32con.LEFT_ALT_PRESSED | win32con.VK_DELETE, 0, 0, 0)
+def main():
+    print("Hello, World!")
 
-win32api.keybd_event(win32con.VK_LWIN, 0, 0, 0)
-win32api.keybd_event(338, 0, 0, 0)
-time.sleep(1)
+    root = tkinter.Tk()
+    app = Application(master=root)
+    app.master.title("My Application Title")
+    window_resolutions = ["800x600"]
+    app.master.geometry("640x480")
+    app.mainloop()
 
-#win32api.keybd_event(win32con.SHIFT_PRESSED, 0, win32con.KEYEVENTF_KEYUP,0)
-#win32api.keybd_event(win32con.LEFT_CTRL_PRESSED, 0, win32con.KEYEVENTF_KEYUP,0)
-#win32api.keybd_event(win32con.LEFT_ALT_PRESSED, 0, win32con.KEYEVENTF_KEYUP,0)
-#win32api.keybd_event(win32con.VK_DELETE, 0, win32con.KEYEVENTF_KEYUP,0)
+    sys.exit(0)
 
-win32api.keybd_event(win32con.VK_LWIN, 0, win32con.KEYEVENTF_KEYUP, 0)
-win32api.keybd_event(338, 0, win32con.KEYEVENTF_KEYUP, 0)
-
-#print(win32con.__dict__)
-
-for entry in win32con.__dict__:
-    #print(entry)
-    if entry.startswith('VK_') or entry.startswith('KEYEVENT'):
-        print(entry)
-
-print(win32api.VkKeyScan('R'))
+if __name__ == "__main__":
+    main()
