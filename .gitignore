@@ -4,3 +4,6 @@ x64
 **/bin/**
 **/obj/**
 *.o
+node_modules
+.idea
+**/html/build/**
