@@ -101,6 +101,20 @@ namespace WindowsFormsApp
 
         private bool bShouldDrawEllipse = false;
         private List<Plant> mPlants = new List<Plant>();
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            //MessageBox.Show(System.IO.Directory.GetCurrentDirectory());
+            System.IO.FileInfo plantsXML = new System.IO.FileInfo("..\\..\\data\\plants.xml");
+            if (plantsXML.Exists)
+            {
+                MessageBox.Show("XML exists!");
+            }
+            else
+            {
+                MessageBox.Show("XML is NOT exist!");
+            }
+        }
         //public List<Plant> mPlants = new List<Plant>();
     }
 }

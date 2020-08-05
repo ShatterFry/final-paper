@@ -1,0 +1,10 @@
+<plants>
+    <plant>
+        <coords>
+            <x>0.24243</x>
+            <y>4.50999</y>
+        </coords>
+        <radius>0.2</radius>
+        <ageType>g1</ageType>
+    </plant>
+</plants>
