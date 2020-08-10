@@ -38,14 +38,29 @@ namespace WindowsFormsApp
             return _X;
         }
 
+        public void SetX(double value)
+        {
+            _X = value;
+        }
+
         public double GetY()
         {
             return _Y;
         }
 
+        public void SetY(double value)
+        {
+            _Y = value;
+        }
+
         public double GetRadius()
         {
             return _Radius;
+        }
+
+        public void SetRadius(double value)
+        {
+            _Radius = value;
         }
     }
 }
