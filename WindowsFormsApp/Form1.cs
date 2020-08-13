@@ -25,6 +25,10 @@ namespace WindowsFormsApp
             g1._minAge = 1;
             g1._maxAge = 4;
 
+            AgeType g3 = new AgeType();
+            g3._minAge = 1;
+            g3._maxAge = 2;
+
             List<Plant> plants = new List<Plant>();
 
             System.IO.FileInfo plantsXML_File = new System.IO.FileInfo("..\\..\\data\\plants.xml");
@@ -57,7 +61,9 @@ namespace WindowsFormsApp
                     double plantY = double.Parse(nodeAttributes.GetNamedItem("y").Value);
                     double plantRadius = double.Parse(nodeAttributes.GetNamedItem("radius").Value);
                     string plantAgeTypeStr = nodeAttributes.GetNamedItem("ageType").Value;
+
                     AgeType plantAgeType = null;
+
                     switch (plantAgeTypeStr)
                     {
                         case "se":
@@ -66,10 +72,14 @@ namespace WindowsFormsApp
                         case "g1":
                             plantAgeType = g1;
                             break;
+                        case "g3":
+                            plantAgeType = g3;
+                            break;
                         default:
                             MessageBox.Show(string.Format("XML Error: Invalid age type: {0}", plantAgeTypeStr));
                             break;
                     }
+
                     plants.Add(new Plant(plantAgeType, plantX, plantY, plantRadius));
                 }
             }
@@ -119,12 +129,16 @@ namespace WindowsFormsApp
 
                 for (int i = 0; i < mPlants.Count; ++i)
                 {
-                    double boundRectX = mPlants[i].GetX() - mPlants[i].GetRadius();
-                    double boundRectY = mPlants[i].GetY() + mPlants[i].GetRadius();
+                    double boundRectX = topLeftX + gridSectionWidth * (mPlants[i].GetX() - mPlants[i].GetRadius());
+                    double boundRectY = maxY - gridSectionHeight * (mPlants[i].GetY() + mPlants[i].GetRadius());
+
                     float plantDiameter = (float)(mPlants[i].GetRadius() * 2.0);
+
                     float rectHeight = plantDiameter * (gridRectHeight / gridSectionsNum);
                     float rectiWidth = plantDiameter * (gridRectWidth / gridSectionsNum);
+
                     RectangleF boundingRect = new RectangleF((float)boundRectX, (float)boundRectY, rectHeight, rectiWidth);
+
                     g.DrawEllipse(myPen, boundingRect);
                     g.FillEllipse(myBrush, boundingRect);
                 }
