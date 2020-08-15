@@ -21,9 +21,21 @@ namespace WindowsFormsApp
             se._minAge = 1;
             se._minAge = 1;
 
+            AgeType j = new AgeType();
+            j._minAge = 1;
+            j._maxAge = 1;
+
+            AgeType im = new AgeType();
+            im._minAge = 1;
+            im._maxAge = 3;
+
             AgeType g1 = new AgeType();
             g1._minAge = 1;
             g1._maxAge = 4;
+
+            AgeType g2 = new AgeType();
+            g2._minAge = 5;
+            g2._maxAge = 5;
 
             AgeType g3 = new AgeType();
             g3._minAge = 1;
@@ -32,6 +44,7 @@ namespace WindowsFormsApp
             List<Plant> plants = new List<Plant>();
 
             System.IO.FileInfo plantsXML_File = new System.IO.FileInfo("..\\..\\data\\plants.xml");
+
             if (plantsXML_File.Exists)
             {
                 //MessageBox.Show("XML exists!");
@@ -69,8 +82,17 @@ namespace WindowsFormsApp
                         case "se":
                             plantAgeType = se;
                             break;
+                        case "j":
+                            plantAgeType = j;
+                            break;
+                        case "im":
+                            plantAgeType = im;
+                            break;
                         case "g1":
                             plantAgeType = g1;
+                            break;
+                        case "g2":
+                            plantAgeType = g2;
                             break;
                         case "g3":
                             plantAgeType = g3;
@@ -85,7 +107,7 @@ namespace WindowsFormsApp
             }
             else
             {
-                MessageBox.Show("XML is NOT exist!");
+                MessageBox.Show(string.Format("XML is NOT exist!\nPath: {0}", plantsXML_File.FullName));
             }
 
             SetPlants(plants);
@@ -105,10 +127,12 @@ namespace WindowsFormsApp
                 System.Drawing.Pen myPen = new System.Drawing.Pen(System.Drawing.Color.Red);
                 System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Aquamarine);
 
-                const int gridRectWidth = 200;
-                const int gridRectHeight = 200;
+                const int gridRectWidth = 400;
+                const int gridRectHeight = 400;
+
                 const int topLeftX = 0;
                 const int topLeftY = 0;
+
                 int maxX = topLeftX + gridRectWidth;
                 int maxY = topLeftY + gridRectHeight;
                 
