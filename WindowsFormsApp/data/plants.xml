@@ -10,4 +10,7 @@
    <plant x="1.37949" y="3.23448" radius="0.033" ageType="j"/>
    <plant x="1.43334" y="3.4041" radius="0.05" ageType="im"/>
    <plant x="1.47093" y="3.08031" radius="0.033" ageType="j"/>
+   <plant x="1.63161" y="2.96799" radius="0.217" ageType="g2"/>
+   <plant x="1.70658" y="3.09102" radius="0.066" ageType="v"/>
+   <plant x="2.01927" y="0.69852" radius="0.25" ageType="g3"/>
 </plants>
