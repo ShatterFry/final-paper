@@ -16,4 +16,8 @@
    <plant x="2.19657" y="3.59253" radius="0.2" ageType="g1"/>
    <plant x="2.58516" y="2.65056" radius="0.2" ageType="g2"/>
    <plant x="2.97834" y="0.49773" radius="0.183" ageType="ss"/>
+   <plant x="3.47964" y="0.69081" radius="0.2" ageType="g3"/>
+   <plant x="3.49155" y="2.62122" radius="0.166" ageType="s"/>
+   <plant x="3.97167" y="3.67674" radius="0.2" ageType="g3"/>
+   <plant x="4.36764" y="0.33888" radius="0.25" ageType="ss"/>
 </plants>
