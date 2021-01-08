@@ -8,13 +8,12 @@ namespace WindowsFormsApp
 {
     public class Plant
     {
-        //public AgeType _AgeType;
         private AgeType _AgeType;
         private double _X;
         private double _Y;
         private double _Radius;
         private double _InitialAge;
-
+        private System.Drawing.Color FillColor = System.Drawing.Color.Aquamarine;
         public Plant()
         {
 
@@ -61,6 +60,21 @@ namespace WindowsFormsApp
         public void SetRadius(double value)
         {
             _Radius = value;
+        }
+
+        public System.Drawing.Color GetFillColor()
+        {
+            return FillColor;
+        }
+
+        public void SetFillColor(System.Drawing.Color inFillColor)
+        {
+            FillColor = inFillColor;
+        }
+
+        public AgeType GetAgeType()
+        {
+            return _AgeType;
         }
     }
 }

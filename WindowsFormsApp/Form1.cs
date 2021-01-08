@@ -12,34 +12,62 @@ namespace WindowsFormsApp
 {
     public partial class Form1 : Form
     {
+        Dictionary<AgeType, AgeTypeData> AgeData = new Dictionary<AgeType, AgeTypeData>();
+        
         public Form1()
         {
             InitializeComponent();
             this.Paint += new PaintEventHandler(Form1_Paint);
 
-            AgeType se = new AgeType();
+            AgeTypeData se = new AgeTypeData();
             se._minAge = 1;
             se._minAge = 1;
+            AgeData[AgeType.se] = se;
 
-            AgeType j = new AgeType();
+            AgeTypeData p = new AgeTypeData();
+            p._minAge = 1;
+            p._maxAge = 1;
+            AgeData[AgeType.p] = p;
+
+            AgeTypeData j = new AgeTypeData();
             j._minAge = 1;
             j._maxAge = 1;
+            AgeData[AgeType.j] = j;
 
-            AgeType im = new AgeType();
+            AgeTypeData im = new AgeTypeData();
             im._minAge = 1;
             im._maxAge = 3;
+            AgeData[AgeType.im] = im;
 
-            AgeType g1 = new AgeType();
+            AgeTypeData v = new AgeTypeData();
+            v._minAge = 1;
+            v._maxAge = 5;
+            AgeData[AgeType.v] = v;
+
+            AgeTypeData g1 = new AgeTypeData();
             g1._minAge = 1;
             g1._maxAge = 4;
+            AgeData[AgeType.g1] = g1;
 
-            AgeType g2 = new AgeType();
+            AgeTypeData g2 = new AgeTypeData();
             g2._minAge = 5;
             g2._maxAge = 5;
+            AgeData[AgeType.g2] = g2;
 
-            AgeType g3 = new AgeType();
+            AgeTypeData g3 = new AgeTypeData();
             g3._minAge = 1;
             g3._maxAge = 2;
+            AgeData[AgeType.g3] = g3;
+
+            AgeTypeData ss = new AgeTypeData();
+            ss._minAge = 1;
+            ss._maxAge = 2;
+            AgeData[AgeType.ss] = ss;
+
+            AgeTypeData s = new AgeTypeData();
+            s._minAge = 1;
+            s._maxAge = 2;
+            AgeData[AgeType.s] = s;
 
             List<Plant> plants = new List<Plant>();
 
@@ -47,62 +75,41 @@ namespace WindowsFormsApp
 
             if (plantsXML_File.Exists)
             {
-                //MessageBox.Show("XML exists!");
                 System.Xml.XmlDocument xmlDocument = new System.Xml.XmlDocument();
                 xmlDocument.Load(plantsXML_File.FullName);
                 System.Xml.XmlElement xmlRoot = xmlDocument.DocumentElement;
+
                 foreach (System.Xml.XmlNode xmlNode in xmlRoot)
                 {
-                    //MessageBox.Show(string.Format("Node Name = {0}", xmlNode.Name));
                     System.Xml.XmlAttributeCollection nodeAttributes = xmlNode.Attributes;
-                    //MessageBox.Show(string.Format("Attributes Count = {0}", nodeAttributes.Count));
-
-                    for (int i = 0; i < nodeAttributes.Count; ++i)
-                    {
-                        //MessageBox.Show(string.Format("Attribute[{0}] = {1} {2}", i, nodeAttributes[i].Name, nodeAttributes[i].Value));
-                    }
-
-                    //MessageBox.Show(string.Format("Getting x attribute: {0}", nodeAttributes.GetNamedItem("x").Value));
-
-                    //MessageBox.Show(string.Format("Child Nodes Cound = {0}", xmlNode.ChildNodes.Count));
-                    foreach (System.Xml.XmlNode childNode in xmlNode.ChildNodes)
-                    {
-                        //MessageBox.Show(string.Format("Child Node Name = {0}", childNode.Name));
-                    }
 
                     double plantX = double.Parse(nodeAttributes.GetNamedItem("x").Value);
                     double plantY = double.Parse(nodeAttributes.GetNamedItem("y").Value);
                     double plantRadius = double.Parse(nodeAttributes.GetNamedItem("radius").Value);
                     string plantAgeTypeStr = nodeAttributes.GetNamedItem("ageType").Value;
 
-                    AgeType plantAgeType = null;
-
-                    switch (plantAgeTypeStr)
+                    System.Xml.XmlNode fillAttr = nodeAttributes.GetNamedItem("fill");
+                    string fillColorStr = null;
+                    System.Drawing.Color fillColor = System.Drawing.Color.Empty;
+                    if (fillAttr != null)
                     {
-                        case "se":
-                            plantAgeType = se;
-                            break;
-                        case "j":
-                            plantAgeType = j;
-                            break;
-                        case "im":
-                            plantAgeType = im;
-                            break;
-                        case "g1":
-                            plantAgeType = g1;
-                            break;
-                        case "g2":
-                            plantAgeType = g2;
-                            break;
-                        case "g3":
-                            plantAgeType = g3;
-                            break;
-                        default:
-                            MessageBox.Show(string.Format("XML Error: Invalid age type: {0}", plantAgeTypeStr));
-                            break;
+                        fillColorStr = fillAttr.Value;
+                        fillColor = System.Drawing.ColorTranslator.FromHtml(fillColorStr);
                     }
 
-                    plants.Add(new Plant(plantAgeType, plantX, plantY, plantRadius));
+                    AgeType plantAgeType = AgeTypeConverter.FromString(plantAgeTypeStr);
+
+                    if (plantAgeType == AgeType.MAX)
+                    {
+                        MessageBox.Show(string.Format("XML Error: Invalid age type: {0}", plantAgeTypeStr));
+                    }
+                    
+                    Plant singlePlant = new Plant(plantAgeType, plantX, plantY, plantRadius);
+                    if (!fillColor.IsEmpty)
+                    {
+                        singlePlant.SetFillColor(fillColor);
+                    }
+                    plants.Add(singlePlant);
                 }
             }
             else
@@ -124,9 +131,6 @@ namespace WindowsFormsApp
             {
                 Graphics g = pe.Graphics;
 
-                System.Drawing.Pen myPen = new System.Drawing.Pen(System.Drawing.Color.Red);
-                System.Drawing.SolidBrush myBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Aquamarine);
-
                 const int gridRectWidth = 400;
                 const int gridRectHeight = 400;
 
@@ -141,7 +145,7 @@ namespace WindowsFormsApp
                 const int gridSectionsNum = 5;
                 int gridSectionWidth = gridRectWidth / gridSectionsNum;
                 int gridSectionHeight = gridRectHeight / gridSectionsNum;
-                //Rectangle[] gridRects = new Rectangle[gridSectionsNum * gridSectionsNum];
+                
                 List<Rectangle> gridRects = new List<Rectangle>();
                 for (int i = 0; i < gridSectionsNum; ++i)
                 {
@@ -151,8 +155,13 @@ namespace WindowsFormsApp
                     }
                 }
 
+                System.Drawing.Color hexFillColor = System.Drawing.ColorTranslator.FromHtml("#FFFF0000");
+                System.Drawing.Pen ellipseBorderPen = new System.Drawing.Pen(System.Drawing.Color.Red);
+
                 for (int i = 0; i < mPlants.Count; ++i)
                 {
+                    Plant currentPlant = mPlants[i];
+
                     double boundRectX = topLeftX + gridSectionWidth * (mPlants[i].GetX() - mPlants[i].GetRadius());
                     double boundRectY = maxY - gridSectionHeight * (mPlants[i].GetY() + mPlants[i].GetRadius());
 
@@ -163,14 +172,20 @@ namespace WindowsFormsApp
 
                     RectangleF boundingRect = new RectangleF((float)boundRectX, (float)boundRectY, rectHeight, rectiWidth);
 
-                    g.DrawEllipse(myPen, boundingRect);
-                    g.FillEllipse(myBrush, boundingRect);
+                    g.DrawEllipse(ellipseBorderPen, boundingRect);
+                    System.Drawing.SolidBrush ellipseFillBrush = new System.Drawing.SolidBrush(currentPlant.GetFillColor());
+                    g.FillEllipse(ellipseFillBrush, boundingRect);
+                    Font textFont = new Font("Arial", 16);
+                    System.Drawing.SolidBrush textBrush = new SolidBrush(Color.Black);
+                    float textX = (float)(topLeftX + gridSectionWidth * (currentPlant.GetX() - currentPlant.GetRadius()));
+                    float textY = (float)(maxY - gridSectionHeight * (currentPlant.GetY() + currentPlant.GetRadius()));
+                    g.DrawString(currentPlant.GetAgeType().ToString(), textFont, textBrush, textX, textY);
+                    //g.DrawString(currentPlant.GetAgeType().ToString(), textFont, textBrush, boundingRect);
                 }
 
-                //g.DrawRectangle(rectPen, boundingRect);
                 g.DrawRectangles(rectPen, gridRects.ToArray());
 
-                myPen.Dispose();
+                ellipseBorderPen.Dispose();
                 rectPen.Dispose();
                 g.Dispose();
             }

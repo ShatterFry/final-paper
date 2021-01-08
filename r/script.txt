@@ -1,0 +1,4 @@
+plants <- c(1, 2, 3)
+file <- "path/to/file"
+table <- read.table(file, header=FALSE)
+plot(table)
