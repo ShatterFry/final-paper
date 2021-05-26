@@ -10,7 +10,7 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApp
 {
-    class Grid
+    public class Grid
     { 
         private int mWidth;
         private int mHeight;
@@ -202,38 +202,14 @@ namespace WindowsFormsApp
 
                 Grid grid = new Grid(400, 400, 5, 0, 0);
 
-                int maxY = grid.GetTopLeftY() + grid.GetHeight();
-
-                System.Drawing.Pen ellipseBorderPen = new System.Drawing.Pen(System.Drawing.Color.Red);
-
                 for (int i = 0; i < mPlants.Count; ++i)
                 {
                     Plant currentPlant = mPlants[i];
-
-                    double boundRectX = grid.GetTopLeftX() + grid.GetSectionWidth() * (currentPlant.GetX() - currentPlant.GetRadius());
-                    double boundRectY = maxY - grid.GetSectionHeight() * (currentPlant.GetY() + currentPlant.GetRadius());
-
-                    float plantDiameter = (float)currentPlant.GetDiameter();
-
-                    float rectHeight = plantDiameter * grid.GetSectionHeight();
-                    float rectiWidth = plantDiameter * grid.GetSectionWidth();
-
-                    RectangleF boundingRect = new RectangleF((float)boundRectX, (float)boundRectY, rectHeight, rectiWidth);
-
-                    g.DrawEllipse(ellipseBorderPen, boundingRect);
-                    System.Drawing.SolidBrush ellipseFillBrush = new System.Drawing.SolidBrush(currentPlant.GetFillColor());
-                    g.FillEllipse(ellipseFillBrush, boundingRect);
-
-                    Font textFont = new Font("Arial", 16);
-                    System.Drawing.SolidBrush textBrush = new SolidBrush(Color.Black);
-                    float textX = (float)(grid.GetTopLeftX() + grid.GetSectionWidth() * (currentPlant.GetX() - currentPlant.GetRadius()));
-                    float textY = (float)(maxY - grid.GetSectionHeight() * (currentPlant.GetY() + currentPlant.GetRadius()));
-                    g.DrawString(currentPlant.GetAgeType().ToString(), textFont, textBrush, textX, textY);
+                    currentPlant.Draw(grid, g);
                 }
 
                 grid.Draw(g);
 
-                ellipseBorderPen.Dispose();
                 g.Dispose();
             }
         }

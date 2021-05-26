@@ -81,5 +81,32 @@ namespace WindowsFormsApp
         {
             return _AgeType;
         }
+
+        public void Draw(Grid inGrid, System.Drawing.Graphics inGraphics)
+        {
+            double boundRectX = inGrid.GetTopLeftX() + inGrid.GetSectionWidth() * (GetX() - GetRadius());
+            int maxY = inGrid.GetTopLeftY() + inGrid.GetHeight();
+            double boundRectY = maxY - inGrid.GetSectionHeight() * (GetY() + GetRadius());
+
+            float plantDiameter = (float)GetDiameter();
+
+            float rectHeight = plantDiameter * inGrid.GetSectionHeight();
+            float rectiWidth = plantDiameter * inGrid.GetSectionWidth();
+
+            System.Drawing.RectangleF boundingRect = new System.Drawing.RectangleF((float)boundRectX, (float)boundRectY, rectHeight, rectiWidth);
+            System.Drawing.Pen ellipseBorderPen = new System.Drawing.Pen(System.Drawing.Color.Red);
+
+            inGraphics.DrawEllipse(ellipseBorderPen, boundingRect);
+            System.Drawing.SolidBrush ellipseFillBrush = new System.Drawing.SolidBrush(GetFillColor());
+            inGraphics.FillEllipse(ellipseFillBrush, boundingRect);
+
+            System.Drawing.Font textFont = new System.Drawing.Font("Arial", 16);
+            System.Drawing.SolidBrush textBrush = new System.Drawing.SolidBrush(System.Drawing.Color.Black);
+            float textX = (float)(inGrid.GetTopLeftX() + inGrid.GetSectionWidth() * (GetX() - GetRadius()));
+            float textY = (float)(maxY - inGrid.GetSectionHeight() * (GetY() + GetRadius()));
+            inGraphics.DrawString(GetAgeType().ToString(), textFont, textBrush, textX, textY);
+
+            ellipseBorderPen.Dispose();
+        }
     }
 }
