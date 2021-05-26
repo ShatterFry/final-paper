@@ -10,15 +10,76 @@ using System.Windows.Forms;
 
 namespace WindowsFormsApp
 {
+    class Grid
+    { 
+        private int mWidth;
+        private int mHeight;
+        private int mSectionsNum;
+        private int mTopLeftX;
+        private int mTopLeftY;
+
+        public Grid(int inWidth, int inHeight, int inSectionsNum, int inTopLeftX, int inTopLeftY)
+        {
+            mWidth = inWidth;
+            mHeight = inHeight;
+            mSectionsNum = inSectionsNum;
+            mTopLeftX = inTopLeftX;
+            mTopLeftY = inTopLeftY;
+        }
+
+        public int GetHeight()
+        {
+            return mHeight;
+        }
+
+        public int GetTopLeftX()
+        {
+            return mTopLeftX;
+        }
+
+        public int GetTopLeftY()
+        {
+            return mTopLeftY;
+        }
+
+        public int GetSectionWidth()
+        {
+            return mWidth / mSectionsNum;
+        }
+
+        public int GetSectionHeight()
+        {
+            return mHeight / mSectionsNum;
+        }
+
+        public void Draw(Graphics inGraphics)
+        {
+            int maxY = mTopLeftY + mHeight;
+
+            int gridSectionWidth = GetSectionWidth();
+            int gridSectionHeight = mHeight / mSectionsNum;
+
+            List<Rectangle> gridRects = new List<Rectangle>();
+            for (int i = 0; i < mSectionsNum; ++i)
+            {
+                for (int j = 0; j < mSectionsNum; ++j)
+                {
+                    gridRects.Add(new Rectangle(mTopLeftX + j * gridSectionWidth, mTopLeftY + i * gridSectionHeight, gridSectionWidth, gridSectionHeight));
+                }
+            }
+
+            System.Drawing.Pen rectPen = new System.Drawing.Pen(System.Drawing.Color.Chocolate);
+            inGraphics.DrawRectangles(rectPen, gridRects.ToArray());
+            rectPen.Dispose();
+        }
+    }
+
     public partial class Form1 : Form
     {
         Dictionary<AgeType, AgeTypeData> AgeData = new Dictionary<AgeType, AgeTypeData>();
-        
-        public Form1()
-        {
-            InitializeComponent();
-            this.Paint += new PaintEventHandler(Form1_Paint);
 
+        private void FillAgeData()
+        {
             AgeTypeData se = new AgeTypeData();
             se._minAge = 1;
             se._minAge = 1;
@@ -68,6 +129,14 @@ namespace WindowsFormsApp
             s._minAge = 1;
             s._maxAge = 2;
             AgeData[AgeType.s] = s;
+        }
+        
+        public Form1()
+        {
+            InitializeComponent();
+            this.Paint += new PaintEventHandler(Form1_Paint);
+
+            FillAgeData();
 
             List<Plant> plants = new List<Plant>();
 
@@ -103,7 +172,7 @@ namespace WindowsFormsApp
                     {
                         MessageBox.Show(string.Format("XML Error: Invalid age type: {0}", plantAgeTypeStr));
                     }
-                    
+
                     Plant singlePlant = new Plant(plantAgeType, plantX, plantY, plantRadius);
                     if (!fillColor.IsEmpty)
                     {
@@ -114,7 +183,7 @@ namespace WindowsFormsApp
             }
             else
             {
-                MessageBox.Show(string.Format("XML is NOT exist!\nPath: {0}", plantsXML_File.FullName));
+                MessageBox.Show(string.Format("XML does NOT exist!\nPath: {0}", plantsXML_File.FullName));
             }
 
             SetPlants(plants);
@@ -131,62 +200,40 @@ namespace WindowsFormsApp
             {
                 Graphics g = pe.Graphics;
 
-                const int gridRectWidth = 400;
-                const int gridRectHeight = 400;
+                Grid grid = new Grid(400, 400, 5, 0, 0);
 
-                const int topLeftX = 0;
-                const int topLeftY = 0;
+                int maxY = grid.GetTopLeftY() + grid.GetHeight();
 
-                int maxX = topLeftX + gridRectWidth;
-                int maxY = topLeftY + gridRectHeight;
-                
-                System.Drawing.Pen rectPen = new System.Drawing.Pen(System.Drawing.Color.Chocolate);
-
-                const int gridSectionsNum = 5;
-                int gridSectionWidth = gridRectWidth / gridSectionsNum;
-                int gridSectionHeight = gridRectHeight / gridSectionsNum;
-                
-                List<Rectangle> gridRects = new List<Rectangle>();
-                for (int i = 0; i < gridSectionsNum; ++i)
-                {
-                    for (int j = 0; j < gridSectionsNum; ++j)
-                    {
-                        gridRects.Add(new Rectangle(topLeftX + j * gridSectionWidth, topLeftY + i * gridSectionHeight, gridSectionWidth, gridSectionHeight));
-                    }
-                }
-
-                System.Drawing.Color hexFillColor = System.Drawing.ColorTranslator.FromHtml("#FFFF0000");
                 System.Drawing.Pen ellipseBorderPen = new System.Drawing.Pen(System.Drawing.Color.Red);
 
                 for (int i = 0; i < mPlants.Count; ++i)
                 {
                     Plant currentPlant = mPlants[i];
 
-                    double boundRectX = topLeftX + gridSectionWidth * (mPlants[i].GetX() - mPlants[i].GetRadius());
-                    double boundRectY = maxY - gridSectionHeight * (mPlants[i].GetY() + mPlants[i].GetRadius());
+                    double boundRectX = grid.GetTopLeftX() + grid.GetSectionWidth() * (currentPlant.GetX() - currentPlant.GetRadius());
+                    double boundRectY = maxY - grid.GetSectionHeight() * (currentPlant.GetY() + currentPlant.GetRadius());
 
-                    float plantDiameter = (float)(mPlants[i].GetRadius() * 2.0);
+                    float plantDiameter = (float)currentPlant.GetDiameter();
 
-                    float rectHeight = plantDiameter * (gridRectHeight / gridSectionsNum);
-                    float rectiWidth = plantDiameter * (gridRectWidth / gridSectionsNum);
+                    float rectHeight = plantDiameter * grid.GetSectionHeight();
+                    float rectiWidth = plantDiameter * grid.GetSectionWidth();
 
                     RectangleF boundingRect = new RectangleF((float)boundRectX, (float)boundRectY, rectHeight, rectiWidth);
 
                     g.DrawEllipse(ellipseBorderPen, boundingRect);
                     System.Drawing.SolidBrush ellipseFillBrush = new System.Drawing.SolidBrush(currentPlant.GetFillColor());
                     g.FillEllipse(ellipseFillBrush, boundingRect);
+
                     Font textFont = new Font("Arial", 16);
                     System.Drawing.SolidBrush textBrush = new SolidBrush(Color.Black);
-                    float textX = (float)(topLeftX + gridSectionWidth * (currentPlant.GetX() - currentPlant.GetRadius()));
-                    float textY = (float)(maxY - gridSectionHeight * (currentPlant.GetY() + currentPlant.GetRadius()));
+                    float textX = (float)(grid.GetTopLeftX() + grid.GetSectionWidth() * (currentPlant.GetX() - currentPlant.GetRadius()));
+                    float textY = (float)(maxY - grid.GetSectionHeight() * (currentPlant.GetY() + currentPlant.GetRadius()));
                     g.DrawString(currentPlant.GetAgeType().ToString(), textFont, textBrush, textX, textY);
-                    //g.DrawString(currentPlant.GetAgeType().ToString(), textFont, textBrush, boundingRect);
                 }
 
-                g.DrawRectangles(rectPen, gridRects.ToArray());
+                grid.Draw(g);
 
                 ellipseBorderPen.Dispose();
-                rectPen.Dispose();
                 g.Dispose();
             }
         }
@@ -217,8 +264,6 @@ namespace WindowsFormsApp
 
         private void button2_Click(object sender, EventArgs e)
         {
-            //MessageBox.Show(System.IO.Directory.GetCurrentDirectory());
-
             System.IO.FileInfo plantsXML_File = new System.IO.FileInfo("..\\..\\data\\plants.xml");
             if (plantsXML_File.Exists)
             {
@@ -251,7 +296,5 @@ namespace WindowsFormsApp
                 MessageBox.Show("XML is NOT exist!");
             }
         }
-
-        //public List<Plant> mPlants = new List<Plant>();
     }
 }

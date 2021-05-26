@@ -57,6 +57,11 @@ namespace WindowsFormsApp
             return _Radius;
         }
 
+        public double GetDiameter()
+        {
+            return (double)(GetRadius() * 2.0);
+        }
+
         public void SetRadius(double value)
         {
             _Radius = value;
