@@ -130,6 +130,59 @@ namespace WindowsFormsApp
             s._maxAge = 2;
             AgeData[AgeType.s] = s;
         }
+
+        List<Plant> CreatePlants()
+        {
+            List<Plant> plants = new List<Plant>();
+
+            System.IO.FileInfo plantsXML_File = new System.IO.FileInfo("..\\..\\data\\plants.xml");
+
+            if (!plantsXML_File.Exists)
+            {
+                MessageBox.Show(string.Format("XML does NOT exist!\nPath: {0}", plantsXML_File.FullName));
+                return plants;
+            }
+            
+            System.Xml.XmlDocument xmlDocument = new System.Xml.XmlDocument();
+            xmlDocument.Load(plantsXML_File.FullName);
+            System.Xml.XmlElement xmlRoot = xmlDocument.DocumentElement;
+
+            foreach (System.Xml.XmlNode xmlNode in xmlRoot)
+            {
+                System.Xml.XmlAttributeCollection nodeAttributes = xmlNode.Attributes;
+
+                double plantX = double.Parse(nodeAttributes.GetNamedItem("x").Value);
+                double plantY = double.Parse(nodeAttributes.GetNamedItem("y").Value);
+                double plantRadius = double.Parse(nodeAttributes.GetNamedItem("radius").Value);
+                string plantAgeTypeStr = nodeAttributes.GetNamedItem("ageType").Value;
+
+                System.Xml.XmlNode fillAttr = nodeAttributes.GetNamedItem("fill");
+                string fillColorStr = null;
+                System.Drawing.Color fillColor = System.Drawing.Color.Empty;
+                if (fillAttr != null)
+                {
+                    fillColorStr = fillAttr.Value;
+                    fillColor = System.Drawing.ColorTranslator.FromHtml(fillColorStr);
+                }
+
+                AgeType plantAgeType = AgeTypeConverter.FromString(plantAgeTypeStr);
+
+                if (plantAgeType == AgeType.MAX)
+                {
+                    MessageBox.Show(string.Format("XML Error: Invalid age type: {0}", plantAgeTypeStr));
+                }
+
+                Plant singlePlant = new Plant(plantAgeType, plantX, plantY, plantRadius);
+                if (!fillColor.IsEmpty)
+                {
+                    singlePlant.SetFillColor(fillColor);
+                }
+                plants.Add(singlePlant);
+            }
+            
+
+            return plants;
+        }
         
         public Form1()
         {
@@ -138,54 +191,7 @@ namespace WindowsFormsApp
 
             FillAgeData();
 
-            List<Plant> plants = new List<Plant>();
-
-            System.IO.FileInfo plantsXML_File = new System.IO.FileInfo("..\\..\\data\\plants.xml");
-
-            if (plantsXML_File.Exists)
-            {
-                System.Xml.XmlDocument xmlDocument = new System.Xml.XmlDocument();
-                xmlDocument.Load(plantsXML_File.FullName);
-                System.Xml.XmlElement xmlRoot = xmlDocument.DocumentElement;
-
-                foreach (System.Xml.XmlNode xmlNode in xmlRoot)
-                {
-                    System.Xml.XmlAttributeCollection nodeAttributes = xmlNode.Attributes;
-
-                    double plantX = double.Parse(nodeAttributes.GetNamedItem("x").Value);
-                    double plantY = double.Parse(nodeAttributes.GetNamedItem("y").Value);
-                    double plantRadius = double.Parse(nodeAttributes.GetNamedItem("radius").Value);
-                    string plantAgeTypeStr = nodeAttributes.GetNamedItem("ageType").Value;
-
-                    System.Xml.XmlNode fillAttr = nodeAttributes.GetNamedItem("fill");
-                    string fillColorStr = null;
-                    System.Drawing.Color fillColor = System.Drawing.Color.Empty;
-                    if (fillAttr != null)
-                    {
-                        fillColorStr = fillAttr.Value;
-                        fillColor = System.Drawing.ColorTranslator.FromHtml(fillColorStr);
-                    }
-
-                    AgeType plantAgeType = AgeTypeConverter.FromString(plantAgeTypeStr);
-
-                    if (plantAgeType == AgeType.MAX)
-                    {
-                        MessageBox.Show(string.Format("XML Error: Invalid age type: {0}", plantAgeTypeStr));
-                    }
-
-                    Plant singlePlant = new Plant(plantAgeType, plantX, plantY, plantRadius);
-                    if (!fillColor.IsEmpty)
-                    {
-                        singlePlant.SetFillColor(fillColor);
-                    }
-                    plants.Add(singlePlant);
-                }
-            }
-            else
-            {
-                MessageBox.Show(string.Format("XML does NOT exist!\nPath: {0}", plantsXML_File.FullName));
-            }
-
+            List<Plant> plants = CreatePlants();
             SetPlants(plants);
         }
 
