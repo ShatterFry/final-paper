@@ -108,5 +108,10 @@ namespace WindowsFormsApp
 
             ellipseBorderPen.Dispose();
         }
+
+        public System.Drawing.PointF GetCenter()
+        {
+            return new System.Drawing.PointF((float)GetX(), (float)GetY());
+        }
     }
 }

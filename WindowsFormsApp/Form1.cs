@@ -119,6 +119,67 @@ namespace WindowsFormsApp
 
             return plants;
         }
+
+        double CalcDistanceBetweenPoints(PointF FirstPoint, PointF SecondPoint)
+        {
+            return Math.Sqrt(Math.Pow(SecondPoint.X - FirstPoint.X, 2) + Math.Pow(SecondPoint.Y - FirstPoint.Y, 2));
+        }
+
+        bool ArePointsEqual(PointF FirstPoint, PointF SecondPoint)
+        {
+            float XDiff = SecondPoint.X - FirstPoint.X;
+            float YDiff = SecondPoint.Y - FirstPoint.Y;
+
+            double eps = 0.001;
+            return XDiff < eps && YDiff < eps;
+        }
+
+        int CalcIntersections()
+        {
+            int IntersectionsCount = 0;
+            List<Tuple<PointF, PointF>> IntersectingPairs = new List<Tuple<PointF, PointF>>();
+
+            for (int i = 0; i < mPlants.Count; ++i)
+            {
+                for (int j = 0; j < mPlants.Count; ++j)
+                {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+
+                    PointF FirstCenter = mPlants[i].GetCenter();
+                    PointF SecondCenter = mPlants[j].GetCenter();
+                    Tuple<PointF, PointF> ReversePair = new Tuple<PointF, PointF>(SecondCenter, FirstCenter);
+
+                    bool bFoundEqualPair = false;
+                    foreach (Tuple<PointF, PointF> IntersectingPair in IntersectingPairs)
+                    {
+                        if (ArePointsEqual(IntersectingPair.Item1, ReversePair.Item1) && ArePointsEqual(IntersectingPair.Item2, ReversePair.Item2))
+                        {
+                            bFoundEqualPair = true;
+                            break;
+                        }
+                    }
+
+                    if (bFoundEqualPair)
+                    {
+                        continue;
+                    }
+                    
+                    double distanceBetweenCenters = CalcDistanceBetweenPoints(FirstCenter, SecondCenter);
+                    if ( distanceBetweenCenters < (mPlants[i].GetRadius() + mPlants[j].GetRadius()) )
+                    {
+                        //MessageBox.Show("Found intersection!");
+                        Console.WriteLine( "Found intersection between plants at {0} and {1}", FirstCenter, SecondCenter );
+                        IntersectingPairs.Add(new Tuple<PointF, PointF>(FirstCenter, SecondCenter));
+                        ++IntersectionsCount;
+                    }
+                }
+            }
+
+            return IntersectionsCount;
+        }
         
         public Form1()
         {
@@ -129,6 +190,8 @@ namespace WindowsFormsApp
 
             List<Plant> plants = CreatePlants();
             SetPlants(plants);
+            int IntersectionsNum = CalcIntersections();
+            Console.WriteLine("IntersectionsNum: {0}", IntersectionsNum);
         }
 
         private void Form1_Load(object sender, EventArgs e)
