@@ -134,6 +134,15 @@ namespace WindowsFormsApp
             return XDiff < eps && YDiff < eps;
         }
 
+        bool ArePlantsIntersecting(Plant FirstPlant, Plant SecondPlant)
+        {
+            PointF FirstCenter = FirstPlant.GetCenter();
+            PointF SecondCenter = SecondPlant.GetCenter();
+
+            double distanceBetweenCenters = CalcDistanceBetweenPoints(FirstCenter, SecondCenter);
+            return distanceBetweenCenters < (FirstPlant.GetRadius() + SecondPlant.GetRadius());
+        }
+
         int CalcIntersections()
         {
             int IntersectionsCount = 0;
@@ -167,10 +176,10 @@ namespace WindowsFormsApp
                         continue;
                     }
                     
-                    double distanceBetweenCenters = CalcDistanceBetweenPoints(FirstCenter, SecondCenter);
-                    if ( distanceBetweenCenters < (mPlants[i].GetRadius() + mPlants[j].GetRadius()) )
+                    //double distanceBetweenCenters = CalcDistanceBetweenPoints(FirstCenter, SecondCenter);
+                    //if ( distanceBetweenCenters < (mPlants[i].GetRadius() + mPlants[j].GetRadius()) )
+                    if(ArePlantsIntersecting(mPlants[i], mPlants[j]))
                     {
-                        //MessageBox.Show("Found intersection!");
                         Console.WriteLine( "Found intersection between plants at {0} and {1}", FirstCenter, SecondCenter );
                         IntersectingPairs.Add(new Tuple<PointF, PointF>(FirstCenter, SecondCenter));
                         ++IntersectionsCount;
@@ -179,6 +188,18 @@ namespace WindowsFormsApp
             }
 
             return IntersectionsCount;
+        }
+
+        void SortPlants()
+        {
+            mPlants.Sort(delegate(Plant FirstPlant, Plant SecondPlant)
+            {
+                if (FirstPlant.CalcArea() > SecondPlant.CalcArea())
+                {
+                    return -1;
+                }
+                return 1;
+            });
         }
         
         public Form1()
@@ -190,6 +211,7 @@ namespace WindowsFormsApp
 
             List<Plant> plants = CreatePlants();
             SetPlants(plants);
+            SortPlants();
             int IntersectionsNum = CalcIntersections();
             Console.WriteLine("IntersectionsNum: {0}", IntersectionsNum);
         }

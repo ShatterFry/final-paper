@@ -113,5 +113,10 @@ namespace WindowsFormsApp
         {
             return new System.Drawing.PointF((float)GetX(), (float)GetY());
         }
+
+        public double CalcArea()
+        {
+            return Math.PI * Math.Pow(GetRadius(), 2);
+        }
     }
 }
