@@ -214,6 +214,8 @@ namespace WindowsFormsApp
             SortPlants();
             int IntersectionsNum = CalcIntersections();
             Console.WriteLine("IntersectionsNum: {0}", IntersectionsNum);
+
+
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -227,12 +229,18 @@ namespace WindowsFormsApp
             {
                 Graphics g = pe.Graphics;
 
-                Grid grid = new Grid(400, 400, 5, 0, 0);
+                int GridWidth = 400;
+                int GridHeight = 400;
+                int GridSectionsNum = 5;
+                int GridTopLeftX = 0;
+                int GridTopLeftY = 0;
+
+                Grid grid = new Grid(GridWidth, GridHeight, GridSectionsNum, GridTopLeftX, GridTopLeftY);
 
                 for (int i = 0; i < mPlants.Count; ++i)
                 {
                     Plant currentPlant = mPlants[i];
-                    currentPlant.Draw(grid, g);
+                    currentPlant.Draw(grid, g, mShowAgeTypeCheckBox.Checked);
                 }
 
                 grid.Draw(g);
@@ -298,6 +306,11 @@ namespace WindowsFormsApp
             {
                 MessageBox.Show("XML is NOT exist!");
             }
+        }
+
+        private void mShowAgeTypeCheckBox_CheckedChanged(object sender, EventArgs e)
+        {
+            Console.WriteLine("mShowAgeTypeCheckBox Checked {0}", mShowAgeTypeCheckBox.Checked);
         }
     }
 }
