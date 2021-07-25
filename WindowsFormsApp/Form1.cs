@@ -215,7 +215,9 @@ namespace WindowsFormsApp
             int IntersectionsNum = CalcIntersections();
             Console.WriteLine("IntersectionsNum: {0}", IntersectionsNum);
 
-
+            comboBox1.Items.Add("Test item 1");
+            comboBox1.Items.Add("Test item 2");
+            comboBox1.Items.Add("Test item 3");
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -262,7 +264,7 @@ namespace WindowsFormsApp
 
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
-
+            Console.WriteLine("ComboBox::SelectedIndexChanged()");
         }
 
         public void SetPlants(List<Plant> inPlants)

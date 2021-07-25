@@ -48,11 +48,11 @@
             // 
             // button2
             // 
-            this.button2.Location = new System.Drawing.Point(614, 123);
+            this.button2.Location = new System.Drawing.Point(590, 122);
             this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 23);
+            this.button2.Size = new System.Drawing.Size(121, 23);
             this.button2.TabIndex = 1;
-            this.button2.Text = "Кнопка 2";
+            this.button2.Text = "Test XML Parsing";
             this.button2.UseVisualStyleBackColor = true;
             this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
