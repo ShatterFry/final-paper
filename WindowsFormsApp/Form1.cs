@@ -190,9 +190,11 @@ namespace WindowsFormsApp
             return IntersectionsCount;
         }
 
-        void SortPlants()
+        List<Plant> SortPlants()
         {
-            mPlants.Sort(delegate(Plant FirstPlant, Plant SecondPlant)
+            List<Plant> SortedPlants = new List<Plant>(mPlants);
+
+            SortedPlants.Sort(delegate(Plant FirstPlant, Plant SecondPlant)
             {
                 if (FirstPlant.CalcArea() > SecondPlant.CalcArea())
                 {
@@ -200,6 +202,8 @@ namespace WindowsFormsApp
                 }
                 return 1;
             });
+
+            return SortedPlants;
         }
         
         public Form1()
@@ -211,7 +215,7 @@ namespace WindowsFormsApp
 
             List<Plant> plants = CreatePlants();
             SetPlants(plants);
-            SortPlants();
+            //SortPlants();
             int IntersectionsNum = CalcIntersections();
             Console.WriteLine("IntersectionsNum: {0}", IntersectionsNum);
 
@@ -239,9 +243,11 @@ namespace WindowsFormsApp
 
                 Grid grid = new Grid(GridWidth, GridHeight, GridSectionsNum, GridTopLeftX, GridTopLeftY);
 
-                for (int i = 0; i < mPlants.Count; ++i)
+                List<Plant> SortedPlants = SortPlants();
+
+                for (int i = 0; i < SortedPlants.Count; ++i)
                 {
-                    Plant currentPlant = mPlants[i];
+                    Plant currentPlant = SortedPlants[i];
                     currentPlant.Draw(grid, g, mShowAgeTypeCheckBox.Checked);
                 }
 
