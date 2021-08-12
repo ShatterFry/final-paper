@@ -127,8 +127,8 @@ namespace WindowsFormsApp
 
         bool ArePointsEqual(PointF FirstPoint, PointF SecondPoint)
         {
-            float XDiff = SecondPoint.X - FirstPoint.X;
-            float YDiff = SecondPoint.Y - FirstPoint.Y;
+            float XDiff = Math.Abs(SecondPoint.X - FirstPoint.X);
+            float YDiff = Math.Abs(SecondPoint.Y - FirstPoint.Y);
 
             double eps = 0.001;
             return XDiff < eps && YDiff < eps;
@@ -190,7 +190,7 @@ namespace WindowsFormsApp
             return IntersectionsCount;
         }
 
-        List<Plant> SortPlants()
+        List<Plant> SortPlantsForDraw()
         {
             List<Plant> SortedPlants = new List<Plant>(mPlants);
 
@@ -205,23 +205,60 @@ namespace WindowsFormsApp
 
             return SortedPlants;
         }
+
+        void OnPictureBoxPaint(object sender, System.Windows.Forms.PaintEventArgs pe)
+        {
+            Console.WriteLine("Form1.OnPictureBoxPaint()");
+        }
+
+        void Form1_OnMouseHover(object sender, System.EventArgs e)
+        {
+            Console.WriteLine("Form1.OnMouseHover()");
+        }
+
+        Point LastMouseLocation;
+
+        void Form1_OnMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
+        {
+            Console.WriteLine("Form1.Form1_OnMouseMove()");
+            Console.WriteLine("Location: {0}", e.Location);
+            LastMouseLocation = e.Location;
+            Console.WriteLine("Current time: {0}", DateTime.Now);
+        }
+
+        void SortPlantsByCoords()
+        {
+            mPlants.Sort(delegate(Plant FirstPlant, Plant SecondPlant)
+            {
+                double eps = 0.001;
+                if (Math.Abs(FirstPlant.GetCenter().X - SecondPlant.GetCenter().X) < eps)
+                {
+                    return FirstPlant.GetCenter().Y < SecondPlant.GetCenter().Y ? -1 : 1;
+                }
+                return FirstPlant.GetCenter().X < SecondPlant.GetCenter().X ? -1 : 1;
+            });
+        }
         
         public Form1()
         {
             InitializeComponent();
             this.Paint += new PaintEventHandler(Form1_Paint);
+            this.MouseHover += new EventHandler(Form1_OnMouseHover);
+            this.MouseMove += new MouseEventHandler(Form1_OnMouseMove);
 
             FillAgeData();
 
             List<Plant> plants = CreatePlants();
             SetPlants(plants);
-            //SortPlants();
+            SortPlantsByCoords();
             int IntersectionsNum = CalcIntersections();
             Console.WriteLine("IntersectionsNum: {0}", IntersectionsNum);
 
             comboBox1.Items.Add("Test item 1");
             comboBox1.Items.Add("Test item 2");
             comboBox1.Items.Add("Test item 3");
+
+            //pictureBox1.Paint += new PaintEventHandler(OnPictureBoxPaint);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -233,6 +270,8 @@ namespace WindowsFormsApp
         {
             if (bShouldDrawEllipse)
             {
+                //Console.WriteLine("Form1.Form1_Paint() Drawing plants");
+
                 Graphics g = pe.Graphics;
 
                 int GridWidth = 400;
@@ -243,7 +282,9 @@ namespace WindowsFormsApp
 
                 Grid grid = new Grid(GridWidth, GridHeight, GridSectionsNum, GridTopLeftX, GridTopLeftY);
 
-                List<Plant> SortedPlants = SortPlants();
+                List<Plant> SortedPlants = SortPlantsForDraw();
+
+                //Console.WriteLine("PictureBox index: {0}", this.Controls.GetChildIndex(pictureBox1));
 
                 for (int i = 0; i < SortedPlants.Count; ++i)
                 {
@@ -259,8 +300,11 @@ namespace WindowsFormsApp
 
         private void button1_Click(object sender, EventArgs e)
         {
+            //Console.WriteLine("Button 1 click");
             bShouldDrawEllipse = true;
+            //Console.WriteLine("Invalidate() BEGIN");
             Invalidate();
+            //Console.WriteLine("Invalidate() END");
         }
 
         private void textBox1_TextChanged(object sender, EventArgs e)
@@ -319,6 +363,14 @@ namespace WindowsFormsApp
         private void mShowAgeTypeCheckBox_CheckedChanged(object sender, EventArgs e)
         {
             Console.WriteLine("mShowAgeTypeCheckBox Checked {0}", mShowAgeTypeCheckBox.Checked);
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            /*System.Windows.Forms.PictureBox TestImage = new System.Windows.Forms.PictureBox();
+            TestImage.Location = new System.Drawing.Point(336, 244);
+            TestImage.Size = new Size(100, 50);
+            TestImage.BackColor = Color.FromArgb(255, 192, 255);*/
         }
     }
 }
