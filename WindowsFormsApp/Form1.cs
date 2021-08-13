@@ -254,9 +254,15 @@ namespace WindowsFormsApp
             int IntersectionsNum = CalcIntersections();
             Console.WriteLine("IntersectionsNum: {0}", IntersectionsNum);
 
-            comboBox1.Items.Add("Test item 1");
+            /*comboBox1.Items.Add("Test item 1");
             comboBox1.Items.Add("Test item 2");
-            comboBox1.Items.Add("Test item 3");
+            comboBox1.Items.Add("Test item 3");*/
+
+            foreach (Plant PlantItem in mPlants)
+            {
+                comboBox1.Items.Add(PlantItem.GetCenter());
+            }
+            
 
             //pictureBox1.Paint += new PaintEventHandler(OnPictureBoxPaint);
         }
