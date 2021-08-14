@@ -13,7 +13,9 @@ namespace WindowsFormsApp
         private double _Y;
         private double _Radius;
         private double _InitialAge;
-        private System.Drawing.Color FillColor = System.Drawing.Color.Aquamarine;
+
+        static System.Drawing.Color DEFAULT_FILL_COLOR = System.Drawing.Color.Aquamarine;
+        private System.Drawing.Color FillColor = DEFAULT_FILL_COLOR;
 
         public Plant()
         {
@@ -78,6 +80,11 @@ namespace WindowsFormsApp
             FillColor = inFillColor;
         }
 
+        public void ResetFillColor()
+        {
+            this.SetFillColor(DEFAULT_FILL_COLOR);
+        }
+
         public AgeType GetAgeType()
         {
             return _AgeType;
@@ -95,7 +102,8 @@ namespace WindowsFormsApp
             float rectiWidth = plantDiameter * inGrid.GetSectionWidth();
 
             System.Drawing.RectangleF boundingRect = new System.Drawing.RectangleF((float)boundRectX, (float)boundRectY, rectHeight, rectiWidth);
-            System.Drawing.Pen ellipseBorderPen = new System.Drawing.Pen(System.Drawing.Color.Red);
+            System.Drawing.Color EllipseBorderColor = System.Drawing.Color.Red;
+            System.Drawing.Pen ellipseBorderPen = new System.Drawing.Pen(EllipseBorderColor);
 
             inGraphics.DrawEllipse(ellipseBorderPen, boundingRect);
             System.Drawing.SolidBrush ellipseFillBrush = new System.Drawing.SolidBrush(GetFillColor());

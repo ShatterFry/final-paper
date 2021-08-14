@@ -238,6 +238,11 @@ namespace WindowsFormsApp
                 return FirstPlant.GetCenter().X < SecondPlant.GetCenter().X ? -1 : 1;
             });
         }
+
+        /*void OnPlantSelected(object sender, System.EventArgs e)
+        {
+            Console.WriteLine("OnPlantSelected()");
+        }*/
         
         public Form1()
         {
@@ -260,9 +265,10 @@ namespace WindowsFormsApp
 
             foreach (Plant PlantItem in mPlants)
             {
-                comboBox1.Items.Add(PlantItem.GetCenter());
+                mPlantSelect.Items.Add(PlantItem.GetCenter());
             }
-            
+
+            //mPlantSelect.SelectionChangeCommitted += new EventHandler(OnPlantSelected);
 
             //pictureBox1.Paint += new PaintEventHandler(OnPictureBoxPaint);
         }
@@ -321,6 +327,29 @@ namespace WindowsFormsApp
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
             Console.WriteLine("ComboBox::SelectedIndexChanged()");
+            //Console.WriteLine("Selected Index: {0}", mPlantSelect.SelectedIndex);
+
+            System.Drawing.PointF SelectedPlantCoords = (System.Drawing.PointF)mPlantSelect.SelectedItem;
+            //Console.WriteLine("Selected Item: {0}", mPlantSelect.SelectedItem);
+            Console.WriteLine("Selected Plant Coords: {0}", SelectedPlantCoords);
+
+            foreach (Plant PlantItem in mPlants)
+            {
+                System.Drawing.PointF CurrentPlantCenter = PlantItem.GetCenter();
+
+                if (ArePointsEqual(CurrentPlantCenter, SelectedPlantCoords))
+                {
+                    Console.WriteLine("Found matching plant!");
+                    PlantItem.SetFillColor(System.Drawing.Color.Black);
+                }
+                else
+                {
+                    PlantItem.ResetFillColor();
+                }
+            }
+            Invalidate();
+
+            //Console.WriteLine("Selected Value: {0}", mPlantSelect.SelectedValue);
         }
 
         public void SetPlants(List<Plant> inPlants)

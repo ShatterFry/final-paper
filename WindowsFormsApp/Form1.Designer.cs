@@ -32,7 +32,7 @@
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.mPlantSelect = new System.Windows.Forms.ComboBox();
             this.mShowAgeTypeCheckBox = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
@@ -74,14 +74,14 @@
             this.textBox1.TabIndex = 3;
             this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
-            // comboBox1
+            // mPlantSelect
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Location = new System.Drawing.Point(648, 55);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 21);
-            this.comboBox1.TabIndex = 4;
-            this.comboBox1.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
+            this.mPlantSelect.FormattingEnabled = true;
+            this.mPlantSelect.Location = new System.Drawing.Point(648, 55);
+            this.mPlantSelect.Name = "mPlantSelect";
+            this.mPlantSelect.Size = new System.Drawing.Size(121, 21);
+            this.mPlantSelect.TabIndex = 4;
+            this.mPlantSelect.SelectedIndexChanged += new System.EventHandler(this.comboBox1_SelectedIndexChanged);
             // 
             // mShowAgeTypeCheckBox
             // 
@@ -102,7 +102,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.mShowAgeTypeCheckBox);
-            this.Controls.Add(this.comboBox1);
+            this.Controls.Add(this.mPlantSelect);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.button2);
@@ -121,7 +121,7 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox mPlantSelect;
         private System.Windows.Forms.CheckBox mShowAgeTypeCheckBox;
     }
 }
