@@ -87,7 +87,8 @@ namespace WindowsFormsApp
             {
                 System.Xml.XmlAttributeCollection nodeAttributes = xmlNode.Attributes;
 
-                double plantX = double.Parse(nodeAttributes.GetNamedItem("x").Value);
+                string plantXStr = nodeAttributes.GetNamedItem("x").Value;
+                double plantX = double.Parse(plantXStr);
                 double plantY = double.Parse(nodeAttributes.GetNamedItem("y").Value);
                 double plantRadius = double.Parse(nodeAttributes.GetNamedItem("radius").Value);
                 string plantAgeTypeStr = nodeAttributes.GetNamedItem("ageType").Value;

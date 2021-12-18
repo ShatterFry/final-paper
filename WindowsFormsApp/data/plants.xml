@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8" ?>
  <plants>
-   <plant x="0.24243" y="4.50999" radius="0.2" ageType="g1"/>
-   <plant x="0.27837" y="0.41184" radius="0.217" ageType="g3"/>
-   <plant x="0.36258" y="3.3966" radius="0.2" ageType="g1"/>
-   <plant x="0.62103" y="2.6586" radius="0.2" ageType="g1"/>
-   <plant x="0.96021" y="3.41421" radius="0.217" ageType="g2"/>
-   <plant x="1.15797" y="0.47283" radius="0.25" ageType="g3"/>
-   <plant x="1.32927" y="3.0903" radius="0.033" ageType="j"/>
-   <plant x="1.37949" y="3.23448" radius="0.033" ageType="im"/>
-   <plant x="1.43334" y="3.4041" radius="0.05" ageType="v"/>
-   <plant x="1.47093" y="3.08031" radius="0.033" ageType="j"/>
-   <plant x="1.63161" y="2.96799" radius="0.217" ageType="g2"/>
-   <plant x="1.70658" y="3.09102" radius="0.066" ageType="v"/>
-   <plant x="2.01927" y="0.69852" radius="0.25" ageType="g3"/>
-   <plant x="2.19657" y="3.59253" radius="0.2" ageType="g1"/>
-   <plant x="2.58516" y="2.65056" radius="0.2" ageType="g2"/>
-   <plant x="2.97834" y="0.49773" radius="0.183" ageType="ss"/>
-   <plant x="3.47964" y="0.69081" radius="0.2" ageType="g3"/>
-   <plant x="3.49155" y="2.62122" radius="0.166" ageType="s"/>
-   <plant x="3.97167" y="3.67674" radius="0.2" ageType="g3"/>
-   <plant x="4.36764" y="0.33888" radius="0.25" ageType="ss"/>
+   <plant x="0,24243" y="4,50999" radius="0,2" ageType="g1"/>
+   <plant x="0,27837" y="0,41184" radius="0,217" ageType="g3"/>
+   <plant x="0,36258" y="3,3966" radius="0,2" ageType="g1"/>
+   <plant x="0,62103" y="2,6586" radius="0,2" ageType="g1"/>
+   <plant x="0,96021" y="3,41421" radius="0,217" ageType="g2"/>
+   <plant x="1,15797" y="0,47283" radius="0,25" ageType="g3"/>
+   <plant x="1,32927" y="3,0903" radius="0,033" ageType="j"/>
+   <plant x="1,37949" y="3,23448" radius="0,033" ageType="im"/>
+   <plant x="1,43334" y="3,4041" radius="0,05" ageType="v"/>
+   <plant x="1,47093" y="3,08031" radius="0,033" ageType="j"/>
+   <plant x="1,63161" y="2,96799" radius="0,217" ageType="g2"/>
+   <plant x="1,70658" y="3,09102" radius="0,066" ageType="v"/>
+   <plant x="2,01927" y="0,69852" radius="0,25" ageType="g3"/>
+   <plant x="2,19657" y="3,59253" radius="0,2" ageType="g1"/>
+   <plant x="2,58516" y="2,65056" radius="0,2" ageType="g2"/>
+   <plant x="2,97834" y="0,49773" radius="0,183" ageType="ss"/>
+   <plant x="3,47964" y="0,69081" radius="0,2" ageType="g3"/>
+   <plant x="3,49155" y="2,62122" radius="0,166" ageType="s"/>
+   <plant x="3,97167" y="3,67674" radius="0,2" ageType="g3"/>
+   <plant x="4,36764" y="0,33888" radius="0,25" ageType="ss"/>
 </plants>
