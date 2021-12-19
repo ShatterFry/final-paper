@@ -68,5 +68,13 @@ namespace WindowsFormsApp
             inGraphics.DrawRectangles(rectPen, gridRects.ToArray());
             rectPen.Dispose();
         }
+
+        public void AbsoluteToLocalPoint(System.Drawing.Point InPoint, out System.Drawing.PointF LocalPoint)
+        {
+            float LocalX = (float)InPoint.X / GetSectionWidth();
+            float LocalY = (float)mSectionsNum - ((float)InPoint.Y / GetSectionHeight());
+
+            LocalPoint = new System.Drawing.PointF(LocalX, LocalY);
+        }
     }
 }

@@ -130,5 +130,17 @@ namespace WindowsFormsApp
         {
             return Math.PI * Math.Pow(GetRadius(), 2);
         }
+
+        public bool IsPointBelongsToPlant(System.Drawing.PointF InPoint)
+        {
+            System.Drawing.PointF PlantCenter = GetCenter();
+
+            if (Utils.CalcDistanceBetweenPoints(PlantCenter, InPoint) < GetRadius())
+            {
+                return true;
+            }
+
+            return false;
+        }
     }
 }

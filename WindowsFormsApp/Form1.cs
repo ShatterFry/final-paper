@@ -121,11 +121,6 @@ namespace WindowsFormsApp
             return plants;
         }
 
-        double CalcDistanceBetweenPoints(PointF FirstPoint, PointF SecondPoint)
-        {
-            return Math.Sqrt(Math.Pow(SecondPoint.X - FirstPoint.X, 2) + Math.Pow(SecondPoint.Y - FirstPoint.Y, 2));
-        }
-
         bool ArePointsEqual(PointF FirstPoint, PointF SecondPoint)
         {
             float XDiff = Math.Abs(SecondPoint.X - FirstPoint.X);
@@ -140,7 +135,7 @@ namespace WindowsFormsApp
             PointF FirstCenter = FirstPlant.GetCenter();
             PointF SecondCenter = SecondPlant.GetCenter();
 
-            double distanceBetweenCenters = CalcDistanceBetweenPoints(FirstCenter, SecondCenter);
+            double distanceBetweenCenters = Utils.CalcDistanceBetweenPoints(FirstCenter, SecondCenter);
             return distanceBetweenCenters < (FirstPlant.GetRadius() + SecondPlant.GetRadius());
         }
 
@@ -219,11 +214,42 @@ namespace WindowsFormsApp
 
         Point LastMouseLocation;
 
+        int GridWidth = 400;
+        int GridHeight = 400;
+        int GridSectionsNum = 5;
+        int GridTopLeftX = 0;
+        int GridTopLeftY = 0;
+
+        void TryFindPlantUnderCursor(Point InCursorPosition, out Plant FoundPlant)
+        {
+            Console.WriteLine("TryFindPlantUnderCursor()");
+
+            PointF GridCursorPosition;
+            mGrid.AbsoluteToLocalPoint(InCursorPosition, out GridCursorPosition);
+            Console.WriteLine("GridCursorPosition: {0}", GridCursorPosition);
+
+            foreach (Plant PlantItem in mPlants)
+            {
+                if (PlantItem.IsPointBelongsToPlant(GridCursorPosition))
+                {
+                    Console.WriteLine("Found plant under cursor!");
+                    FoundPlant = PlantItem;
+                }
+            }
+
+            FoundPlant = null;
+        }
+
         void Form1_OnMouseMove(object sender, System.Windows.Forms.MouseEventArgs e)
         {
             Console.WriteLine("Form1.Form1_OnMouseMove()");
             Console.WriteLine("Location: {0}", e.Location);
             LastMouseLocation = e.Location;
+            if (mGrid != null)
+            {
+                Plant PlantUnderCursor;
+                TryFindPlantUnderCursor(e.Location, out PlantUnderCursor);
+            }
             Console.WriteLine("Current time: {0}", DateTime.Now);
         }
 
@@ -279,6 +305,8 @@ namespace WindowsFormsApp
 
         }
 
+        Grid mGrid;
+
         private void Form1_Paint(object sender, System.Windows.Forms.PaintEventArgs pe)
         {
             if (bShouldDrawEllipse)
@@ -287,13 +315,7 @@ namespace WindowsFormsApp
 
                 Graphics g = pe.Graphics;
 
-                int GridWidth = 400;
-                int GridHeight = 400;
-                int GridSectionsNum = 5;
-                int GridTopLeftX = 0;
-                int GridTopLeftY = 0;
-
-                Grid grid = new Grid(GridWidth, GridHeight, GridSectionsNum, GridTopLeftX, GridTopLeftY);
+                mGrid = new Grid(GridWidth, GridHeight, GridSectionsNum, GridTopLeftX, GridTopLeftY);
 
                 List<Plant> SortedPlants = SortPlantsForDraw();
 
@@ -302,10 +324,10 @@ namespace WindowsFormsApp
                 for (int i = 0; i < SortedPlants.Count; ++i)
                 {
                     Plant currentPlant = SortedPlants[i];
-                    currentPlant.Draw(grid, g, mShowAgeTypeCheckBox.Checked);
+                    currentPlant.Draw(mGrid, g, mShowAgeTypeCheckBox.Checked);
                 }
 
-                grid.Draw(g);
+                mGrid.Draw(g);
 
                 g.Dispose();
             }
