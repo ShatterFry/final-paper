@@ -430,5 +430,11 @@ namespace WindowsFormsApp
             TestImage.Size = new Size(100, 50);
             TestImage.BackColor = Color.FromArgb(255, 192, 255);*/
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Form2 form2 = new Form2();
+            form2.ShowDialog();
+        }
     }
 }
